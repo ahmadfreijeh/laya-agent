@@ -1,7 +1,7 @@
 import type { Request, Response } from "express";
 import { ZodError } from "zod";
 
-import { handle } from "../agent.js";
+import { handle } from "../services/agent.service.js";
 import { validateAgentBody } from "../validators/agent.validator.js";
 
 export async function postAgent(req: Request, res: Response): Promise<void> {

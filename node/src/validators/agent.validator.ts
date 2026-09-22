@@ -3,9 +3,8 @@ import { z } from "zod";
 export const agentBodySchema = z.object({
   state: z
     .object({
-      from: z.string().optional(),
-      subject: z.string().optional(),
-      body: z.string().min(1),
+      customer: z.string().optional(),
+      message: z.string().min(1),
     })
     .passthrough(),
 });

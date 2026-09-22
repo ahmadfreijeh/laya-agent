@@ -1,6 +1,6 @@
 # laya-imp
 
-Small demo: **Laya** classifies a support email; a **Node agent** picks a tool or a template.
+Small demo: a general **customer support agent**. The customer asks for something, **Laya** reads which thing they want done, and the agent runs that action. Shared questions run on every message. Scenario questions run only when that thing needs them. Node sends only state. Add a thing to do in `python/src/questions.py` (`THINGS_TO_DO`, and `SCENARIOS` when it needs extra questions) and in the Node action list. A chat box can call this later.
 
 ```text
 POST /agent → validator → controller → Laya /predict → policy / tools / reply
@@ -8,8 +8,8 @@ POST /agent → validator → controller → Laya /predict → policy / tools / 
 
 | Folder | Role |
 |---|---|
-| `python/` | Laya server, requirements, `.env`, and the virtualenv (`.venv`). `python/train/` is reserved for later fine-tunes. |
-| `node/` | Agent, questions, policy, tools, replies |
+| `python/` | Laya server, question list, shortlist, requirements, `.env`, and the virtualenv (`.venv`). `python/train/` is reserved for later fine-tunes. |
+| `node/` | Agent, policy, and actions. Sends state only. |
 
 ## Setup
 
@@ -67,6 +67,15 @@ npm start
 
 Node listens on `PORT` (default `3000`) and calls `LAYA_URL` (default `http://127.0.0.1:8000`).
 
+## API docs
+
+Each server has its own Swagger page:
+
+| Server | URL |
+|---|---|
+| Node agent | http://127.0.0.1:3000/docs |
+| Python Laya | http://127.0.0.1:8000/docs |
+
 Health check:
 
 ```bash
@@ -78,7 +87,7 @@ curl -s http://127.0.0.1:3000/health
 ```bash
 curl -s http://127.0.0.1:3000/agent \
   -H 'Content-Type: application/json' \
-  -d '{"state":{"from":"user@acme.com","subject":"Duplicate charge on invoice #4411","body":"We were billed twice for March. Please refund the duplicate today."}}'
+  -d '{"state":{"customer":"user@acme.com","message":"Where is my order? It was supposed to arrive yesterday."}}'
 ```
 
 Or call Laya directly:
@@ -86,5 +95,5 @@ Or call Laya directly:
 ```bash
 curl -s http://127.0.0.1:8000/predict \
   -H 'Content-Type: application/json' \
-  -d '{"state":{"body":"We were billed twice. Please refund today."},"questions":{"department":{"type":"choice","instructions":"Which department?","criteria":{"billing":"invoices, refunds","other":"everything else"}}}}'
+  -d '{"state":{"message":"Where is my order?"}}'
 ```
