@@ -4,8 +4,8 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-root = Path(__file__).resolve().parents[2]
-load_dotenv(root / ".env")
+python_root = Path(__file__).resolve().parents[1]
+load_dotenv(python_root / ".env")
 load_dotenv()
 
 if not os.getenv("HF_TOKEN", "").strip():

@@ -8,27 +8,27 @@ POST /agent → validator → controller → Laya /predict → policy / tools / 
 
 | Folder | Role |
 |---|---|
-| `python/` | Load Laya, `POST /predict`. `python/train/` is reserved for later fine-tunes. |
+| `python/` | Laya server, requirements, `.env`, and the virtualenv (`.venv`). `python/train/` is reserved for later fine-tunes. |
 | `node/` | Agent, questions, policy, tools, replies |
 
 ## Setup
 
-```bash
-cp .env.example .env
-```
-
-Optional: uncomment `HF_TOKEN` in `.env` only for gated Hugging Face models.
-
 ### Python
 
+Work from `python/`. The virtualenv and env file live in that folder.
+
 ```bash
+cd python
+cp .env.example .env
 python3 -m venv .venv
 source .venv/bin/activate
 pip install --upgrade pip
-pip install -r python/requirements.txt
+pip install -r requirements.txt
 ```
 
 That installs `laya`, `transformers`, `torch`, `accelerate`, `huggingface_hub`, `python-dotenv`, `fastapi`, and `uvicorn`.
+
+Optional: uncomment `HF_TOKEN` in `python/.env` only for gated Hugging Face models.
 
 ### Node
 
@@ -45,8 +45,8 @@ Use two terminals. Start Python first (it loads the model).
 **Terminal 1 — Laya**
 
 ```bash
-source .venv/bin/activate
 cd python
+source .venv/bin/activate
 uvicorn src.server:app --host 127.0.0.1 --port 8000
 ```
 
