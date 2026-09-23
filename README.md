@@ -4,13 +4,6 @@ Small demo: a general **customer support agent**. The customer asks for somethin
 
 POST /agent → validator → controller → **Laya** /predict → policy / tools / reply
 
-## Todo
-
-- [ ] A chat box that calls `POST /agent`.
-- [ ] A small language model that reasons only when **Laya**'s score is too low to pass an action or a reply. Confident messages stay on **Laya**. Tokens apply only on that low-score path.
-- [ ] Several actions in one message. Most actions become their own `noul` questions, so each can be true at once. Relay runs an action only when its confidence is high enough. The same action must not stay both in `need` and as a `noul`.
-- [ ] Fine-tunes in `python/train/`.
-
 | Folder | Role |
 |---|---|
 | `python/` | **Laya** server, question list, shortlist, requirements, `.env`, and the virtualenv (`.venv`). `python/train/` is reserved for later fine-tunes. |
@@ -207,3 +200,10 @@ Errors from `POST /agent`:
 ```
 
 `400` when `state.message` is missing. `502` when **Laya** cannot be reached; `details` is omitted and `error` is the failure message.
+
+## Todo
+
+- [ ] A chat box that calls `POST /agent`.
+- [ ] A small language model that reasons only when **Laya**'s score is too low to pass an action or a reply. Confident messages stay on **Laya**. Tokens apply only on that low-score path.
+- [ ] Several actions in one message. Most actions become their own `noul` questions, so each can be true at once. Relay runs an action only when its confidence is high enough. The same action must not stay both in `need` and as a `noul`.
+- [ ] Fine-tunes in `python/train/`.
