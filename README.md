@@ -104,6 +104,19 @@ npm start
 
 Node listens on `PORT` (default `3000`) and calls `LAYA_URL` (default `http://127.0.0.1:8000`).
 
+## Simulation
+
+With **Laya** running, play a short customer conversation through the agent. The log prints the reply and every answer Python returned.
+
+```bash
+cd node
+npm run simulate -- happy
+npm run simulate -- upset
+npm run simulate -- happy upset
+```
+
+`happy` is a polite thread. `upset` is the same requests, written as complaints. Passing two or more names prints an evaluation table after the conversations: each label's percentage, side by side, per turn.
+
 ## API docs
 
 Each server has its own Swagger page:

@@ -4,15 +4,20 @@
   "type": "module",
   "scripts": {
     "start": "tsx src/server.ts",
+    "simulate": "tsx src/simulate.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "cli-table3": "^0.6.5",
     "express": "^5.1.0",
+    "figlet": "^1.11.4",
+    "ora": "^9.4.1",
     "swagger-ui-express": "^5.0.1",
     "zod": "^3.24.0"
   },
   "devDependencies": {
     "@types/express": "^5.0.0",
+    "@types/figlet": "^1.7.0",
     "@types/node": "^22.10.0",
     "@types/swagger-ui-express": "^4.1.8",
     "tsx": "^4.19.0",
