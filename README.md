@@ -13,7 +13,9 @@ POST /agent → validator → controller → **Laya** /predict → policy / tool
 
 Support work starts as a free-text message. **Laya** reads that message and answers a fixed list of questions: what the customer wants done, how urgent it is, which language to reply in, and whether they are upset. When the need is clear, it also answers the extra questions that action needs, such as why they want a refund or whether the order has already shipped.
 
-Those answers are what Relay acts on. The agent picks one action when **Laya** is confident, runs it, and replies. A weak or unclear read stays with a person instead of guessing.
+Those answers are what Relay acts on. The agent picks one action when **Laya** is confident, runs it, and replies. A weak or unclear read stays with a person.
+
+Later, a small language model will reason only when **Laya**'s score is too low to pass an action or a reply. Confident messages stay on **Laya**. That small model is the case that can use tokens.
 
 New support work is another question plus another action. The question list can grow; **Laya** shortlists the closest ones on each message. Later fine-tunes live in `python/train/`.
 
@@ -42,7 +44,7 @@ Shared questions run on every message. Scenario questions run in a second call o
 - **Less back and forth.** Scenario answers arrive with the ticket: refund reason, shipment state, lockout. The next person starts with those facts.
 - **Room to add products.** Each new thing customers ask for is one entry in the question list and one action. The same agent covers more of the catalog over time.
 - **A path to several requests at once.** Customers often ask for more than one thing in a sentence. Later, each action can be its own yes-or-no question, so Relay can run every one that is confident enough.
-- **No token bill, most of the time.** **Laya** does not charge per token. Most messages are one or two local passes and a fixed reply, with no token cost. You pay for the machine that holds the weights (about 800 MB, downloaded once) and for the people who still handle tickets **Laya** is not confident about.
+- **No token bill, most of the time.** **Laya** does not charge per token. Most messages are one or two local passes and a fixed reply, with no token cost. You pay for the machine that holds the weights (about 800 MB, downloaded once) and for the people who still handle tickets **Laya** is not confident about. Later, a small language model will reason only on those low-score messages, when the score is too low to pass an action or a reply. Tokens apply there.
 
 Each customer message costs one **Laya** pass for the shared questions, and a second pass only when `need` is confident enough to ask the scenario questions. Those passes return answers. They do not generate text, so there is no token meter on the reply. A longer catalog of things to do stays inside the same pass: the shortlist keeps at most 20 choice labels. Adding a question does not add a token charge.
 
