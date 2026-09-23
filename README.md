@@ -1,4 +1,4 @@
-# laya-imp
+# Relay
 
 Small demo: a general **customer support agent**. The customer asks for something, **Laya** reads which thing they want done, and the agent runs that action. Shared questions run on every message. Scenario questions run only when that thing needs them. Node sends only state. Add a thing to do in `python/src/questions.py` (`THINGS_TO_DO`, and `SCENARIOS` when it needs extra questions) and in the Node action list. A chat box can call this later.
 
