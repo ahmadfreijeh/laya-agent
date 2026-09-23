@@ -2,26 +2,24 @@
 
 Small demo: a general **customer support agent**. The customer asks for something, **Laya** reads which thing they want done, and the agent runs that action. Shared questions run on every message. Scenario questions run only when that thing needs them. Node sends only state. Add a thing to do in `python/src/questions.py` (`THINGS_TO_DO`, and `SCENARIOS` when it needs extra questions) and in the Node action list. A chat box can call this later.
 
-```text
-POST /agent → validator → controller → Laya /predict → policy / tools / reply
-```
+POST /agent → validator → controller → **Laya** /predict → policy / tools / reply
 
 | Folder | Role |
 |---|---|
-| `python/` | Laya server, question list, shortlist, requirements, `.env`, and the virtualenv (`.venv`). `python/train/` is reserved for later fine-tunes. |
+| `python/` | **Laya** server, question list, shortlist, requirements, `.env`, and the virtualenv (`.venv`). `python/train/` is reserved for later fine-tunes. |
 | `node/` | Agent, policy, and actions. Sends state only. |
 
-## Why Laya
+## Why **Laya**
 
-Support work starts as a free-text message. Laya reads that message and answers a fixed list of questions: what the customer wants done, how urgent it is, which language to reply in, and whether they are upset. When the need is clear, it also answers the extra questions that action needs, such as why they want a refund or whether the order has already shipped.
+Support work starts as a free-text message. **Laya** reads that message and answers a fixed list of questions: what the customer wants done, how urgent it is, which language to reply in, and whether they are upset. When the need is clear, it also answers the extra questions that action needs, such as why they want a refund or whether the order has already shipped.
 
-Those answers are what Relay acts on. The agent picks one action when Laya is confident, runs it, and replies. A weak or unclear read stays with a person instead of guessing.
+Those answers are what Relay acts on. The agent picks one action when **Laya** is confident, runs it, and replies. A weak or unclear read stays with a person instead of guessing.
 
-New support work is another question plus another action. The question list can grow; Laya shortlists the closest ones on each message. Later fine-tunes live in `python/train/`.
+New support work is another question plus another action. The question list can grow; **Laya** shortlists the closest ones on each message. Later fine-tunes live in `python/train/`.
 
-## What Laya is
+## What **Laya** is
 
-Laya (`convaiinnovations/laya`) is an open-source decision model, Apache 2.0. The weights and the `laya` package are public, so Relay runs them on your own machine. It is the same kind of model as Jev: you give it a state and typed questions, and it returns an answer with a confidence. It is non-autoregressive: one forward pass does that work. It does not write the customer reply. Relay writes that after it reads the answers.
+**Laya** (`convaiinnovations/laya`) is an open-source decision model, Apache 2.0. The weights and the `laya` package are public, so Relay runs them on your own machine. It is the same kind of model as **Jev**: you give it a state and typed questions, and it returns an answer with a confidence. It is non-autoregressive: one forward pass does that work. It does not write the customer reply. Relay writes that after it reads the answers.
 
 The checkpoint this demo loads is the English one. Its encoder is ModernBERT-large (about 421M parameters, 512-token context, about 800 MB of weights). Python loads it with `laya.load` and keeps it in the FastAPI process.
 
@@ -46,7 +44,7 @@ Shared questions run on every message. Scenario questions run in a second call o
 - **A path to several requests at once.** Customers often ask for more than one thing in a sentence. Later, each action can be its own yes-or-no question, so Relay can run every one that is confident enough.
 - **A predictable bill.** There is no per-message model fee. The weights download once (about 800 MB) and stay on your machine. You pay for the process that holds the model, CPU or GPU, and for the people who still handle low-confidence tickets.
 
-Each customer message costs one Laya pass for the shared questions, and a second pass only when `need` is confident enough to ask the scenario questions. Those passes return answers. They do not generate the reply, so the cost does not grow with how long the answer text is. A longer catalog of things to do stays inside the same pass: the shortlist keeps at most 20 choice labels. Adding a question does not add a new vendor call.
+Each customer message costs one **Laya** pass for the shared questions, and a second pass only when `need` is confident enough to ask the scenario questions. Those passes return answers. They do not generate the reply, so the cost does not grow with how long the answer text is. A longer catalog of things to do stays inside the same pass: the shortlist keeps at most 20 choice labels. Adding a question does not add a new vendor call.
 
 ## Setup
 
@@ -111,7 +109,7 @@ Each server has its own Swagger page:
 | Server | URL |
 |---|---|
 | Node agent | http://127.0.0.1:3000/docs |
-| Python Laya | http://127.0.0.1:8000/docs |
+| Python **Laya** | http://127.0.0.1:8000/docs |
 
 Health check:
 
@@ -127,7 +125,7 @@ curl -s http://127.0.0.1:3000/agent \
   -d '{"state":{"customer":"user@acme.com","message":"Where is my order? It was supposed to arrive yesterday."}}'
 ```
 
-Or call Laya directly:
+Or call **Laya** directly:
 
 ```bash
 curl -s http://127.0.0.1:8000/predict \
@@ -143,7 +141,7 @@ Both health checks return:
 { "ok": true }
 ```
 
-`POST /agent` returns the action Relay chose, whether a tool ran, the customer reply, and the Laya answers that drove the choice.
+`POST /agent` returns the action Relay chose, whether a tool ran, the customer reply, and the **Laya** answers that drove the choice.
 
 ```json
 {
@@ -167,7 +165,7 @@ Both health checks return:
 | `used_llm` | `true` when `action` has no registered handler and Relay drafts a holding reply. |
 | `tool` | What the action ran, or `null` when that action has no tool. |
 | `reply` | Text to show the customer. |
-| `answers` | Laya's answers. Scenario keys (here `not_arrived`) appear only when `need` is confident enough. |
+| `answers` | **Laya**'s answers. Scenario keys (here `not_arrived`) appear only when `need` is confident enough. |
 
 Each answer is one of three shapes:
 
@@ -199,4 +197,4 @@ Errors from `POST /agent`:
 { "error": "invalid body", "details": {} }
 ```
 
-`400` when `state.message` is missing. `502` when Laya cannot be reached; `details` is omitted and `error` is the failure message.
+`400` when `state.message` is missing. `502` when **Laya** cannot be reached; `details` is omitted and `error` is the failure message.
