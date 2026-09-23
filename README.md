@@ -42,9 +42,9 @@ Shared questions run on every message. Scenario questions run in a second call o
 - **Less back and forth.** Scenario answers arrive with the ticket: refund reason, shipment state, lockout. The next person starts with those facts.
 - **Room to add products.** Each new thing customers ask for is one entry in the question list and one action. The same agent covers more of the catalog over time.
 - **A path to several requests at once.** Customers often ask for more than one thing in a sentence. Later, each action can be its own yes-or-no question, so Relay can run every one that is confident enough.
-- **A predictable bill.** There is no per-message model fee. The weights download once (about 800 MB) and stay on your machine. You pay for the process that holds the model, CPU or GPU, and for the people who still handle low-confidence tickets.
+- **No token bill, most of the time.** **Laya** does not charge per token. Most messages are one or two local passes and a fixed reply, with no token cost. You pay for the machine that holds the weights (about 800 MB, downloaded once) and for the people who still handle tickets **Laya** is not confident about.
 
-Each customer message costs one **Laya** pass for the shared questions, and a second pass only when `need` is confident enough to ask the scenario questions. Those passes return answers. They do not generate the reply, so the cost does not grow with how long the answer text is. A longer catalog of things to do stays inside the same pass: the shortlist keeps at most 20 choice labels. Adding a question does not add a new vendor call.
+Each customer message costs one **Laya** pass for the shared questions, and a second pass only when `need` is confident enough to ask the scenario questions. Those passes return answers. They do not generate text, so there is no token meter on the reply. A longer catalog of things to do stays inside the same pass: the shortlist keeps at most 20 choice labels. Adding a question does not add a token charge.
 
 ## Setup
 
