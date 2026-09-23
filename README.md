@@ -19,6 +19,24 @@ Those answers are what Relay acts on. The agent picks one action when Laya is co
 
 New support work is another question plus another action. The question list can grow; Laya shortlists the closest ones on each message. Later fine-tunes live in `python/train/`.
 
+## What Laya is
+
+Laya (`convaiinnovations/laya`) is an open-source decision model, Apache 2.0. The weights and the `laya` package are public, so Relay runs them on your own machine. It is the same kind of model as Jev: you give it a state and typed questions, and it returns an answer with a confidence. It is non-autoregressive: one forward pass does that work. It does not write the customer reply. Relay writes that after it reads the answers.
+
+The checkpoint this demo loads is the English one. Its encoder is ModernBERT-large (about 421M parameters, 512-token context, about 800 MB of weights). Python loads it with `laya.load` and keeps it in the FastAPI process.
+
+Each question has a type:
+
+| Type | What the model returns |
+|---|---|
+| `choice` | One label from `criteria`, plus `confidence`. |
+| `score` | A point on the `criteria` scale, plus `confidence`. |
+| `noul` | A yes-or-no probability (`noul`), plus `confidence`. |
+
+`predict_shortlist` is how this server asks. It embeds the state and each choice label with the encoder already loaded (`embed_fn_from_agent`), keeps the closest `SHORTLIST_K` labels (20), then runs one predict on that shorter list. When a question has 20 labels or fewer, the full list goes through and the embed step is skipped. Choice probabilities are over the labels that were kept.
+
+Shared questions run on every message. Scenario questions run in a second call only after `need` is a confident choice. Node never loads the model. It sends `state` and uses the `answers` object.
+
 ## What this changes for the business
 
 - **Faster first step.** Common requests (order status, refund, cancel, replace, account access) start as soon as the message arrives, with a reply the customer can see.
@@ -26,6 +44,9 @@ New support work is another question plus another action. The question list can 
 - **Less back and forth.** Scenario answers arrive with the ticket: refund reason, shipment state, lockout. The next person starts with those facts.
 - **Room to add products.** Each new thing customers ask for is one entry in the question list and one action. The same agent covers more of the catalog over time.
 - **A path to several requests at once.** Customers often ask for more than one thing in a sentence. Later, each action can be its own yes-or-no question, so Relay can run every one that is confident enough.
+- **A predictable bill.** There is no per-message model fee. The weights download once (about 800 MB) and stay on your machine. You pay for the process that holds the model, CPU or GPU, and for the people who still handle low-confidence tickets.
+
+Each customer message costs one Laya pass for the shared questions, and a second pass only when `need` is confident enough to ask the scenario questions. Those passes return answers. They do not generate the reply, so the cost does not grow with how long the answer text is. A longer catalog of things to do stays inside the same pass: the shortlist keeps at most 20 choice labels. Adding a question does not add a new vendor call.
 
 ## Setup
 
