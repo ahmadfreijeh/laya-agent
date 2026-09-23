@@ -1,6 +1,14 @@
 # Each key is something the customer can ask the agent to do.
 # The key is the action name Node runs. Add more entries here.
 # Shortlist keeps the closest 20 when this list grows past that.
+#
+# `need` is one choice, so it can return only one of these actions.
+# Customers often ask for several things in one sentence (refund and return
+# and a ticket). A choice drops the rest. Later, most of these actions will
+# become their own noul questions so each can be true at once. The agent will
+# loop over those answers and run an action only when its confidence is high
+# enough. Do not keep the same action both here and as a noul; the two answers
+# would conflict.
 
 SHORTLIST_K = 20
 MIN_NEED_CONF = 0.8
