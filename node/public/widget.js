@@ -6,6 +6,8 @@
   var endpoint = script.dataset.endpoint || new URL("/agent", script.src).href;
   var title = script.dataset.title || "Support";
   var greeting = script.dataset.greeting || "Hi. How can we help?";
+  var themeUrl = script.dataset.theme || new URL("/widget/theme", script.src).href;
+  var previewing = false;
   var brainsUrl = script.dataset.brains || new URL("/questions", script.src).href;
   var pickedName = "relay-chat-brain:" + endpoint;
   var brains = [];
@@ -22,7 +24,23 @@
     error: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7.5" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M12 8.2v4.6M12 16.2h.01" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>',
   };
 
+  var BUBBLE_ICONS = {
+    headset: icons.agent,
+    user: icons.user,
+    chat: icons.chat,
+    bot: outline('<rect x="5" y="8" width="14" height="11" rx="3"/><path d="M12 4.5V8M9.5 13h.01M14.5 13h.01"/>'),
+    sparkle: outline('<path d="M12 4l1.8 4.9 4.9 1.8-4.9 1.8L12 17.4l-1.8-4.9-4.9-1.8 4.9-1.8Z"/>'),
+    smile: outline('<circle cx="12" cy="12" r="7.5"/><path d="M9 14c.8 1 1.8 1.5 3 1.5s2.2-.5 3-1.5M9.5 10h.01M14.5 10h.01"/>'),
+    heart: outline('<path d="M12 19s-6.5-3.9-6.5-8.6A3.6 3.6 0 0 1 12 8.3a3.6 3.6 0 0 1 6.5 2.1C18.5 15.1 12 19 12 19Z"/>'),
+    star: outline('<path d="M12 4.5l2.3 4.7 5.2.8-3.8 3.6.9 5.1L12 16.3l-4.6 2.4.9-5.1-3.8-3.6 5.2-.8Z"/>'),
+    bolt: outline('<path d="M13 3.5 6 13h5l-1 7.5L17 11h-5Z"/>'),
+    none: "",
+  };
+  script.relayBubbleIcons = BUBBLE_ICONS;
+  var bubbleIcons = { agent: "headset", user: "user" };
+
   var dockHidden = script.dataset.dock === "hidden";
+  var preview = script.dataset.preview === "true";
   var convo = load();
   var generation = 0;
 
@@ -34,16 +52,20 @@
   root.innerHTML =
     '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap">' +
     "<style>" +
-    ":host{font-family:\"DM Sans\",ui-sans-serif,system-ui,sans-serif;color:#1c1c1e;}" +
+    ":host{--primary:#1c1c1e;--on-primary:#fff;--chat-bg:#f7f7f8;--agent-bg:#fff;--agent-text:#1c1c1e;font-family:\"DM Sans\",ui-sans-serif,system-ui,sans-serif;color:#1c1c1e;}" +
     "button,textarea,input{font:inherit;}" +
     "svg{display:block;width:16px;height:16px;}" +
-    ".launcher{width:56px;height:56px;border:0;border-radius:50%;background:#1c1c1e;color:#fff;cursor:pointer;display:grid;place-items:center;box-shadow:0 10px 28px rgba(28,28,30,.22);}" +
+    ".launcher{width:56px;height:56px;border:0;border-radius:50%;background:var(--primary);color:var(--on-primary);cursor:pointer;display:grid;place-items:center;box-shadow:0 10px 28px rgba(28,28,30,.22);}" +
     ".launcher svg{width:24px;height:24px;}" +
+    ".launcher{margin-left:auto;}" +
+    ":host([data-side=left]) .launcher{margin-left:0;}" +
     ".launcher:focus-visible,.send:focus-visible,.close:focus-visible,.fresh:focus-visible,textarea:focus-visible,input:focus-visible,.confirm button:focus-visible{outline:2px solid #3b6cff;outline-offset:2px;}" +
     ".panel{display:none;flex-direction:column;width:min(380px,calc(100vw - 32px));height:min(560px,calc(100vh - 96px));margin-bottom:12px;background:#fff;border:1px solid #ececee;border-radius:20px;box-shadow:0 18px 50px rgba(28,28,30,.14);overflow:hidden;}" +
     ".panel.open{display:flex;}" +
     ".head{display:flex;align-items:center;gap:10px;padding:14px 8px 14px 16px;border-bottom:1px solid #ececee;}" +
-    ".brand{width:32px;height:32px;border-radius:10px;background:#1c1c1e;color:#fff;display:grid;place-items:center;flex:none;}" +
+    ".brand{width:32px;height:32px;border-radius:10px;background:var(--primary);color:var(--on-primary);display:grid;place-items:center;flex:none;overflow:hidden;}" +
+    ".brand.logo{background:transparent;}" +
+    ".brand img{width:100%;height:100%;object-fit:contain;display:block;}" +
     ".titles{min-width:0;}" +
     ".head h2{margin:0;font-size:15px;font-weight:600;letter-spacing:-.01em;}" +
     ".who{margin:2px 0 0;font-size:12px;color:#6b6b70;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}" +
@@ -54,12 +76,12 @@
     ".icon{width:32px;height:32px;border:0;border-radius:10px;background:transparent;color:#1c1c1e;cursor:pointer;display:grid;place-items:center;flex:none;}" +
     ".icon:hover{background:#f4f4f5;}" +
     ".actions{margin-left:auto;display:flex;}" +
-    ".log{flex:1;overflow:auto;padding:16px;display:flex;flex-direction:column;gap:12px;background:#f7f7f8;}" +
+    ".log{flex:1;overflow:auto;padding:16px;display:flex;flex-direction:column;gap:12px;background:var(--chat-bg);}" +
     ".msg{display:flex;}" +
     ".msg.user{justify-content:flex-end;}" +
     ".bubble{display:flex;gap:8px;align-items:flex-start;max-width:86%;padding:10px 12px;border-radius:16px;font-size:14px;line-height:1.45;}" +
-    ".agent .bubble{background:#fff;border:1px solid #ececee;border-bottom-left-radius:6px;color:#1c1c1e;}" +
-    ".user .bubble{background:#1c1c1e;color:#fff;border-bottom-right-radius:6px;}" +
+    ".agent .bubble{background:var(--agent-bg);border:1px solid #ececee;border-bottom-left-radius:6px;color:var(--agent-text);}" +
+    ".user .bubble{background:var(--primary);color:var(--on-primary);border-bottom-right-radius:6px;}" +
     ".error .bubble{background:#fff;border:1px solid #f3d0d0;color:#8f1d1d;border-bottom-left-radius:6px;}" +
     ".mark{flex:none;margin-top:2px;opacity:.8;}" +
     ".text{margin:0;white-space:pre-wrap;word-break:break-word;}" +
@@ -69,7 +91,7 @@
     ".composer{padding:12px;border-top:1px solid #ececee;background:#fff;}" +
     "textarea,input[type=email]{flex:1;min-width:0;resize:none;min-height:42px;max-height:96px;padding:10px 12px;border:1px solid #e4e4e7;border-radius:14px;background:#fafafa;color:#1c1c1e;box-sizing:border-box;}" +
     "textarea::placeholder,input::placeholder{color:#8e8e93;}" +
-    ".send,.continue{height:42px;border:0;border-radius:14px;background:#1c1c1e;color:#fff;cursor:pointer;flex:none;}" +
+    ".send,.continue{height:42px;border:0;border-radius:14px;background:var(--primary);color:var(--on-primary);cursor:pointer;flex:none;}" +
     ".send{width:42px;display:grid;place-items:center;}" +
     ".continue{padding:0 14px;}" +
     ".send:disabled,.continue:disabled{opacity:.45;cursor:default;}" +
@@ -77,7 +99,7 @@
     ".confirm p{margin:0;flex:1;}" +
     ".confirm button{border:0;border-radius:10px;padding:8px 10px;cursor:pointer;}" +
     ".cancel{background:#f4f4f5;color:#1c1c1e;}" +
-    ".reset{background:#1c1c1e;color:#fff;}" +
+    ".reset{background:var(--primary);color:var(--on-primary);}" +
     "[hidden]{display:none !important;}" +
     "</style>" +
     '<div class="panel" role="dialog" aria-label="' + escapeAttr(title) + '">' +
@@ -143,6 +165,11 @@
     focusEntry();
   });
   loadBrains();
+  script.addEventListener("relay-theme", function (event) {
+    previewing = true;
+    applyTheme(event.detail || {});
+  });
+  loadTheme();
   input.addEventListener("keydown", function (event) {
     if (event.key === "Enter" && !event.shiftKey) {
       event.preventDefault();
@@ -152,6 +179,57 @@
 
   render();
   document.body.appendChild(host);
+  if (script.dataset.open === "true") toggle();
+
+  function loadTheme() {
+    fetch(themeUrl)
+      .then(function (res) {
+        return res.ok ? res.json() : null;
+      })
+      .then(function (body) {
+        if (body && body.theme && !previewing) applyTheme(body.theme);
+      })
+      .catch(function () {
+        /* the built-in look stays when the theme can't be loaded */
+      });
+  }
+
+  function applyTheme(theme) {
+    var colors = {
+      "--primary": theme.primary,
+      "--on-primary": theme.primaryText,
+      "--chat-bg": theme.chatBackground,
+      "--agent-bg": theme.agentBubble,
+      "--agent-text": theme.agentText,
+    };
+    Object.keys(colors).forEach(function (name) {
+      if (/^#[0-9a-f]{6}$/i.test(colors[name] || "")) host.style.setProperty(name, colors[name]);
+    });
+    if (theme.title && !script.dataset.title) {
+      title = theme.title;
+      root.querySelector(".head h2").textContent = title;
+      panel.setAttribute("aria-label", title);
+    }
+    if (theme.greeting && !script.dataset.greeting) greeting = theme.greeting;
+    if (Object.prototype.hasOwnProperty.call(BUBBLE_ICONS, theme.agentIcon)) bubbleIcons.agent = theme.agentIcon;
+    if (Object.prototype.hasOwnProperty.call(BUBBLE_ICONS, theme.userIcon)) bubbleIcons.user = theme.userIcon;
+    var brand = root.querySelector(".brand");
+    if (theme.logo) {
+      var img = document.createElement("img");
+      img.src = theme.logo;
+      img.alt = "";
+      brand.replaceChildren(img);
+      brand.classList.add("logo");
+    } else {
+      brand.innerHTML = BUBBLE_ICONS[bubbleIcons.agent] || icons.agent;
+      brand.classList.remove("logo");
+    }
+    var left = theme.position === "left";
+    host.style.left = left ? "20px" : "";
+    host.style.right = left ? "" : "20px";
+    host.dataset.side = left ? "left" : "right";
+    render();
+  }
 
   function fixedBrain() {
     return (script.dataset.key || "").trim().replace(/\.json$/i, "");
@@ -324,6 +402,10 @@
     convo.messages.forEach(function (message) {
       addBubble(message.text, message.kind);
     });
+    if (preview && !convo.messages.length) {
+      addBubble("Where is my order? It was due yesterday.", "user");
+      addBubble("It shipped on Monday and should arrive tomorrow.", "agent");
+    }
     var hasEmail = Boolean(convo.email);
     gate.hidden = hasEmail;
     composer.hidden = !hasEmail;
@@ -342,7 +424,7 @@
     bubble.className = "bubble";
     var mark = document.createElement("span");
     mark.className = "mark";
-    mark.innerHTML = icons[kind] || icons.agent;
+    setMark(mark, kind);
     var body = document.createElement("p");
     body.className = "text";
     body.textContent = text;
@@ -356,9 +438,19 @@
 
   function setBubble(entry, text, kind) {
     entry.msg.className = "msg " + kind;
-    entry.mark.innerHTML = icons[kind] || icons.agent;
+    setMark(entry.mark, kind);
     entry.body.textContent = text;
     log.scrollTop = log.scrollHeight;
+  }
+
+  function setMark(mark, kind) {
+    var html = kind === "error" ? icons.error : BUBBLE_ICONS[kind === "user" ? bubbleIcons.user : bubbleIcons.agent];
+    mark.innerHTML = html || "";
+    mark.hidden = !html;
+  }
+
+  function outline(paths) {
+    return '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">' + paths + "</svg>";
   }
 
   function load() {

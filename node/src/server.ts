@@ -8,6 +8,7 @@ import swaggerUi from "swagger-ui-express";
 import { openapi } from "./openapi.js";
 import { agentRoute } from "./routes/agent.route.js";
 import { questionsRoute } from "./routes/questions.route.js";
+import { themeRoute } from "./routes/theme.route.js";
 
 const PORT = Number(process.env.PORT) || 3000;
 const rootDir = path.join(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -27,7 +28,7 @@ app.use((_req, res, next) => {
   }
   next();
 });
-app.use(express.json());
+app.use(express.json({ limit: "1mb" }));
 app.use(express.static(publicDir));
 app.use("/docs", swaggerUi.serve, swaggerUi.setup(openapi));
 app.get("/health", (_req, res) => {
@@ -39,6 +40,9 @@ app.get("/brain", (_req, res) => {
 app.get("/test", (_req, res) => {
   res.render("test");
 });
+app.get("/theme", (_req, res) => {
+  res.render("theme");
+});
 app.get("/questions.html", (_req, res) => {
   res.redirect(301, "/brain");
 });
@@ -47,6 +51,7 @@ app.get(["/demo", "/demo.html"], (_req, res) => {
 });
 app.use(agentRoute);
 app.use(questionsRoute);
+app.use(themeRoute);
 
 app.listen(PORT, () => {
   console.log(`agent listening on http://127.0.0.1:${PORT}`);
@@ -54,4 +59,5 @@ app.listen(PORT, () => {
   console.log(`chat widget at http://127.0.0.1:${PORT}/widget.js`);
   console.log(`widget page at http://127.0.0.1:${PORT}/test`);
   console.log(`brain at http://127.0.0.1:${PORT}/brain`);
+  console.log(`widget theme at http://127.0.0.1:${PORT}/theme`);
 });

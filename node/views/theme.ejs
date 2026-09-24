@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Widget theme</title>
+    <link rel="stylesheet" href="/brain.css" />
+    <link rel="stylesheet" href="/theme.css" />
+  </head>
+  <body>
+    <header>
+      <div class="top">
+        <h1>Widget theme</h1>
+        <nav class="links"><a href="/brain">Brains</a><a href="/test">Widget page</a></nav>
+      </div>
+      <p>How the chat looks on every site that loads the widget. The chat in the corner is a live preview.</p>
+    </header>
+    <main class="theme-main">
+      <div class="work">
+        <div class="bar">
+          <div class="title">
+            <strong>Look and feel</strong>
+            <span class="dirty" id="dirty" hidden>Unsaved changes</span>
+          </div>
+          <div class="tools">
+            <button class="tool" type="button" id="discard">Discard</button>
+            <button class="primary" type="submit" form="theme-form" id="save">Save</button>
+          </div>
+          <p class="status" id="status" hidden></p>
+        </div>
+        <form id="theme-form" novalidate>
+          <section>
+            <h2>Text</h2>
+            <label>Title<input data-field="title" maxlength="60" /></label>
+            <label>Greeting<textarea data-field="greeting" rows="2" maxlength="200"></textarea></label>
+          </section>
+          <section>
+            <h2>Logo</h2>
+            <div class="logo-row">
+              <div class="logo-box" id="logo-box"></div>
+              <div class="logo-actions">
+                <label class="tool upload">Upload image<input type="file" id="logo-file" accept="image/png,image/jpeg,image/gif,image/webp,image/svg+xml" /></label>
+                <button class="tool" type="button" id="logo-remove">Remove</button>
+              </div>
+            </div>
+            <label>Or an image URL<input data-field="logoUrl" placeholder="https://example.com/logo.png" /></label>
+            <p class="hint">Square images look best. Uploads up to 300 KB. Without a logo the header shows the headset icon.</p>
+          </section>
+          <section>
+            <h2>Colors</h2>
+            <div class="colors" id="colors"></div>
+          </section>
+          <section>
+            <h2>Bubble icons</h2>
+            <div class="icon-pick">
+              <span>Support replies</span>
+              <div class="icon-set" role="radiogroup" aria-label="Support reply icon" data-icons="agentIcon"></div>
+            </div>
+            <div class="icon-pick">
+              <span>Visitor messages</span>
+              <div class="icon-set" role="radiogroup" aria-label="Visitor message icon" data-icons="userIcon"></div>
+            </div>
+            <p class="hint">Without a logo, the header also shows the support reply icon.</p>
+          </section>
+          <section>
+            <h2>Position</h2>
+            <div class="segmented" role="radiogroup" aria-label="Position">
+              <label><input type="radio" name="position" value="right" /> Bottom right</label>
+              <label><input type="radio" name="position" value="left" /> Bottom left</label>
+            </div>
+          </section>
+          <button class="reset-defaults" type="button" id="defaults">Reset to defaults</button>
+        </form>
+      </div>
+    </main>
+    <dialog id="confirm-dialog">
+      <form method="dialog">
+        <p id="confirm-text"></p>
+        <div class="choices">
+          <button type="submit" value="cancel">Cancel</button>
+          <button type="submit" value="ok" id="confirm-ok">Replace</button>
+        </div>
+      </form>
+    </dialog>
+    <script src="/widget.js" data-open="true" data-preview="true"></script>
+    <script src="/theme.js"></script>
+  </body>
+</html>

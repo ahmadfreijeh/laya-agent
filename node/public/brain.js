@@ -35,6 +35,12 @@ document.getElementById("new-set").addEventListener("click", async () => {
 document.getElementById("test-open").addEventListener("click", () => openTest(loadedKey));
 document.getElementById("json-open").addEventListener("click", openJson);
 document.getElementById("copy-open").addEventListener("click", saveCopy);
+document.getElementById("discard").addEventListener("click", async () => {
+  if (!isDirty() || !(await askConfirm("Discard your unsaved changes?", "Discard", true))) return;
+  draft = JSON.parse(baseline);
+  setStatus("");
+  renderEditor();
+});
 document.getElementById("try-run").addEventListener("click", runTry);
 tryMessageEl.addEventListener("keydown", (event) => {
   if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) runTry();
@@ -450,6 +456,7 @@ function refreshBar() {
   document.getElementById("bar-name").textContent = loadedKey || draft.key.trim() || "New brain";
   document.getElementById("bar-dirty").hidden = !dirty;
   saveEl.disabled = !dirty;
+  document.getElementById("discard").disabled = !dirty;
   for (const id of ["test-open", "copy-open"]) document.getElementById(id).disabled = !loadedKey;
   if (dirty) setStatus("");
 }

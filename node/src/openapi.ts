@@ -60,6 +60,36 @@ export const openapi = {
         responses: { "200": { description: "Deleted file" }, "404": { description: "Missing file" } },
       },
     },
+    "/widget/theme": {
+      get: {
+        summary: "Read the widget theme",
+        responses: { "200": { description: "Saved theme and the defaults" } },
+      },
+      put: {
+        summary: "Replace the widget theme",
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              example: {
+                title: "Support",
+                greeting: "Hi. How can we help?",
+                logo: "",
+                primary: "#1c1c1e",
+                primaryText: "#ffffff",
+                chatBackground: "#f7f7f8",
+                agentBubble: "#ffffff",
+                agentText: "#1c1c1e",
+                agentIcon: "headset",
+                userIcon: "user",
+                position: "right",
+              },
+            },
+          },
+        },
+        responses: { "200": { description: "Saved theme" }, "400": { description: "Invalid theme" } },
+      },
+    },
     "/agent": {
       post: {
         summary: "Handle a customer message",
