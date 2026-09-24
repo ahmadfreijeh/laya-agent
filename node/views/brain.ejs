@@ -4,14 +4,13 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Brains</title>
+    <link rel="stylesheet" href="/base.css" />
     <link rel="stylesheet" href="/brain.css" />
   </head>
   <body>
-    <header>
-      <div class="top">
-        <h1>Brains</h1>
-        <nav class="links"><a href="/theme">Widget theme</a><a href="/test">Widget page</a></nav>
-      </div>
+    <%- include("partials/nav", { active: "brain" }) %>
+    <header class="page-head">
+      <h1>Brains</h1>
       <p>A brain decides what Laya reads from each customer message: what they need, how urgent it is, and what to ask next.</p>
     </header>
     <div class="layout">

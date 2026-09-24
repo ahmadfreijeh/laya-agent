@@ -4,15 +4,13 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Widget theme</title>
-    <link rel="stylesheet" href="/brain.css" />
+    <link rel="stylesheet" href="/base.css" />
     <link rel="stylesheet" href="/theme.css" />
   </head>
   <body>
-    <header>
-      <div class="top">
-        <h1>Widget theme</h1>
-        <nav class="links"><a href="/brain">Brains</a><a href="/test">Widget page</a></nav>
-      </div>
+    <%- include("partials/nav", { active: "theme" }) %>
+    <header class="page-head">
+      <h1>Widget theme</h1>
       <p>How the chat looks on every site that loads the widget. The chat in the corner is a live preview.</p>
     </header>
     <main class="theme-main">

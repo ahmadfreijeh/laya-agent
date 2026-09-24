@@ -4,37 +4,31 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Widget test</title>
+    <link rel="stylesheet" href="/base.css" />
     <style>
-      body {
-        margin: 0;
-        font-family: ui-sans-serif, system-ui, sans-serif;
-        color: #172033;
-        background: #f6f7f9;
-      }
-      main {
-        max-width: 640px;
-        margin: 0 auto;
-        padding: 64px 24px;
-      }
-      code {
-        font-size: 14px;
-      }
-      pre {
-        padding: 16px;
-        overflow: auto;
-        background: #fff;
-        border-radius: 12px;
-      }
+      .doc { max-width: 1080px; margin: 0 auto; padding: 0 24px 64px; }
+      .doc section { max-width: 640px; padding: 20px 0; border-top: 1px solid var(--line); }
+      .doc p { margin: 6px 0 12px; color: var(--text-2); }
+      .doc pre { margin: 0; padding: 12px 14px; overflow: auto; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); }
     </style>
   </head>
   <body>
-    <main>
-      <h1>Any website</h1>
-      <p>This page is only a host. The chat in the corner comes from the script tag below. With more than one brain, pick one from the menu under the chat title.</p>
-      <p><a href="/brain">Edit the brain</a></p>
-      <pre><code>&lt;script src="http://127.0.0.1:3000/widget.js" defer&gt;&lt;/script&gt;</code></pre>
-      <p>To lock the chat to one brain and hide the menu, add <code>data-key</code>:</p>
-      <pre><code>&lt;script src="http://127.0.0.1:3000/widget.js" data-key="support" defer&gt;&lt;/script&gt;</code></pre>
+    <%- include("partials/nav", { active: "test" }) %>
+    <header class="page-head">
+      <h1>Widget test</h1>
+      <p>This page stands in for any website. The chat in the corner comes from the script tag below.</p>
+    </header>
+    <main class="doc">
+      <section>
+        <h2>Embed</h2>
+        <p>With more than one brain, visitors pick one from the menu under the chat title.</p>
+        <pre><code>&lt;script src="http://127.0.0.1:3000/widget.js" defer&gt;&lt;/script&gt;</code></pre>
+      </section>
+      <section>
+        <h2>Lock to one brain</h2>
+        <p>Add <code>data-key</code> to use one brain and hide the menu.</p>
+        <pre><code>&lt;script src="http://127.0.0.1:3000/widget.js" data-key="support" defer&gt;&lt;/script&gt;</code></pre>
+      </section>
     </main>
     <script src="/widget.js" defer></script>
   </body>
