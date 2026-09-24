@@ -162,8 +162,6 @@ function refresh() {
     box.textContent = "No logo";
   }
   box.classList.toggle("empty", !draft.logo);
-  box.style.background = draft.logo ? "" : draft.primary;
-  box.style.color = draft.logo ? "" : draft.primaryText;
   document.getElementById("logo-remove").disabled = !draft.logo;
   document.body.classList.toggle("side-left", draft.position === "left");
   if (widgetScript) widgetScript.dispatchEvent(new CustomEvent("relay-theme", { detail: draft }));
