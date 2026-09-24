@@ -6,7 +6,7 @@
   var endpoint = script.dataset.endpoint || new URL("/agent", script.src).href;
   var title = script.dataset.title || "Support";
   var greeting = script.dataset.greeting || "Hi. How can we help?";
-  var storageKey = "relay-chat:" + endpoint;
+  var storageKey = storageName();
 
   var icons = {
     chat: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7.2 18.2 4.8 20.5V7.4A2.4 2.4 0 0 1 7.2 5h9.6a2.4 2.4 0 0 1 2.4 2.4v8.4a2.4 2.4 0 0 1-2.4 2.4H7.2Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>',
@@ -18,6 +18,7 @@
     error: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7.5" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M12 8.2v4.6M12 16.2h.01" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>',
   };
 
+  var dockHidden = script.dataset.dock === "hidden";
   var convo = load();
   var generation = 0;
 
@@ -42,7 +43,8 @@
     ".titles{min-width:0;}" +
     ".head h2{margin:0;font-size:15px;font-weight:600;letter-spacing:-.01em;}" +
     ".who{margin:2px 0 0;font-size:12px;color:#6b6b70;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}" +
-    ".who:empty{display:none;}" +
+    ".who:empty,.brain:empty{display:none;}" +
+    ".brain{margin:2px 0 0;font-size:12px;color:#6b6b70;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}" +
     ".icon{width:32px;height:32px;border:0;border-radius:10px;background:transparent;color:#1c1c1e;cursor:pointer;display:grid;place-items:center;flex:none;}" +
     ".icon:hover{background:#f4f4f5;}" +
     ".actions{margin-left:auto;display:flex;}" +
@@ -73,7 +75,7 @@
     "[hidden]{display:none !important;}" +
     "</style>" +
     '<div class="panel" role="dialog" aria-label="' + escapeAttr(title) + '">' +
-    '<div class="head"><span class="brand">' + icons.agent + '</span><div class="titles"><h2></h2><p class="who"></p></div>' +
+    '<div class="head"><span class="brand">' + icons.agent + '</span><div class="titles"><h2></h2><p class="who"></p><p class="brain"></p></div>' +
     '<div class="actions"><button class="icon fresh" type="button" aria-label="New conversation">' + icons.fresh + "</button>" +
     '<button class="icon close" type="button" aria-label="Close chat">' + icons.close + "</button></div></div>" +
     '<div class="log"></div>' +
@@ -97,10 +99,20 @@
   var send = composer.querySelector(".send");
   var confirmBar = root.querySelector(".confirm");
   var who = root.querySelector(".who");
+  var brain = root.querySelector(".brain");
   root.querySelector(".head h2").textContent = title;
+  showBrain();
+  if (dockHidden) {
+    host.style.display = "none";
+    launcher.hidden = true;
+    panel.style.marginBottom = "0";
+  }
 
   launcher.addEventListener("click", toggle);
-  root.querySelector(".close").addEventListener("click", toggle);
+  root.querySelector(".close").addEventListener("click", function () {
+    if (panel.classList.contains("open")) toggle();
+    if (dockHidden) host.style.display = "none";
+  });
   root.querySelector(".fresh").addEventListener("click", function () {
     confirmBar.hidden = false;
   });
@@ -110,6 +122,24 @@
   confirmBar.querySelector(".reset").addEventListener("click", reset);
   emailForm.addEventListener("submit", onEmail);
   composer.addEventListener("submit", onSubmit);
+  script.addEventListener("relay-open", function () {
+    reset();
+    if (dockHidden) host.style.display = "";
+    if (!panel.classList.contains("open")) toggle();
+    else focusEntry();
+  });
+  new MutationObserver(function () {
+    showBrain();
+    var next = storageName();
+    if (next === storageKey) return;
+    storageKey = next;
+    generation += 1;
+    convo = load();
+    confirmBar.hidden = true;
+    send.disabled = false;
+    input.value = "";
+    render();
+  }).observe(script, { attributes: true, attributeFilter: ["data-key"] });
   input.addEventListener("keydown", function (event) {
     if (event.key === "Enter" && !event.shiftKey) {
       event.preventDefault();
@@ -119,6 +149,27 @@
 
   render();
   document.body.appendChild(host);
+
+  function brainName() {
+    return (script.dataset.key || "").trim().replace(/\.json$/i, "");
+  }
+
+  function storageName() {
+    var key = brainName();
+    return "relay-chat:" + endpoint + (key ? ":" + key : "");
+  }
+
+  function showBrain() {
+    var key = brainName();
+    brain.textContent = key ? "Testing " + key : "";
+  }
+
+  function requestBody(text) {
+    var payload = { state: { customer: convo.email, message: text } };
+    var key = brainName();
+    if (key) payload.key = key;
+    return payload;
+  }
 
   function toggle() {
     var open = panel.classList.toggle("open");
@@ -154,7 +205,7 @@
     fetch(endpoint, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ state: { customer: convo.email, message: text } }),
+      body: JSON.stringify(requestBody(text)),
     })
       .then(function (res) {
         return res.json().then(function (body) {

@@ -5,8 +5,8 @@ import type { AgentBody } from "../validators/agent.validator.js";
 
 export async function postAgent(req: Request, res: Response): Promise<void> {
   try {
-    const { state } = req.body as AgentBody;
-    const result = await handle(state);
+    const { state, key } = req.body as AgentBody;
+    const result = await handle(state, key);
     res.json(result);
   } catch (err) {
     const message = err instanceof Error ? err.message : "agent failed";

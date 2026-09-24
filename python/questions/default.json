@@ -1,0 +1,96 @@
+{
+  "shortlist_k": 20,
+  "min_need_prob": 0.6,
+  "min_need_conf": 0.7,
+  "shared": {
+    "need": {
+      "type": "choice",
+      "instructions": "What is the customer asking support to do?",
+      "criteria": {
+        "reply": "they want an answer or an explanation in the chat",
+        "order_status": "where an order is, or whether it has shipped or arrived",
+        "refund": "refund the money",
+        "cancel": "stop an order or a subscription before it is fulfilled",
+        "replace": "replace or exchange the item or order",
+        "account": "sign-in, password, or account access",
+        "more_help": "they want a person to follow up, or they need more assistance",
+        "follow_up": "something already done that still needs a person, and none of the specific actions above",
+        "other": "unclear"
+      }
+    },
+    "urgency": {
+      "type": "score",
+      "instructions": "How urgent is this request?",
+      "criteria": ["not urgent", "soon", "critical or blocking"]
+    },
+    "language": {
+      "type": "choice",
+      "instructions": "What language should the reply use?",
+      "criteria": {
+        "english": "the customer is writing in English",
+        "arabic": "the customer is writing in Arabic",
+        "french": "the customer is writing in French",
+        "spanish": "the customer is writing in Spanish",
+        "other": "any other language"
+      }
+    },
+    "upset": {
+      "type": "noul",
+      "instructions": "Is the customer upset or complaining?"
+    },
+    "reply_kind": {
+      "type": "choice",
+      "instructions": "What kind of message is this?",
+      "criteria": {
+        "unclear": "unclear or not real words",
+        "greeting": "hello, hi, or good morning",
+        "general": "thanks, okay, or goodbye",
+        "request": "a request for help"
+      }
+    }
+  },
+  "scenarios": {
+    "order_status": {
+      "not_arrived": {
+        "type": "noul",
+        "instructions": "Is the customer saying the order has not arrived?"
+      }
+    },
+    "refund": {
+      "refund_reason": {
+        "type": "choice",
+        "instructions": "Why does the customer want a refund?",
+        "criteria": {
+          "duplicate": "charged more than once",
+          "not_received": "order or item never arrived",
+          "wrong_item": "wrong or defective item",
+          "other": "any other reason"
+        }
+      }
+    },
+    "cancel": {
+      "already_shipped": {
+        "type": "noul",
+        "instructions": "Has the order already shipped?"
+      }
+    },
+    "replace": {
+      "defective": {
+        "type": "noul",
+        "instructions": "Is the item broken or defective?"
+      }
+    },
+    "account": {
+      "locked_out": {
+        "type": "noul",
+        "instructions": "Can the customer not sign in?"
+      }
+    },
+    "follow_up": {
+      "blocked": {
+        "type": "noul",
+        "instructions": "Is the customer blocked until support acts?"
+      }
+    }
+  }
+}

@@ -42,9 +42,9 @@ function draftReply(state: State): string {
   return `${replies.holding}${message.slice(0, 120)}`;
 }
 
-export async function handle(state: State): Promise<AgentResult> {
+export async function handle(state: State, key?: string): Promise<AgentResult> {
   const { customer, message } = state;
-  const { answers } = await predict({ customer, message });
+  const { answers } = await predict({ customer, message }, key);
   const chosen = chooseAction(answers);
 
   const run = TOOLS[chosen];

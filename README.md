@@ -1,12 +1,12 @@
 # Relay
 
-Small demo: a general **customer support agent**. The customer asks for something, **Laya** reads which thing they want done, and the agent runs that action. Shared questions run on every message. Scenario questions run only when that thing needs them. Node sends only state. Add a thing to do in `python/src/questions.py` (`THINGS_TO_DO`, and `SCENARIOS` when it needs extra questions) and its customer reply in `node/src/replies.json`. A chat box can call this later.
+Small demo: a general **customer support agent**. The customer asks for something, **Laya** reads which thing they want done, and the agent runs that action. Shared questions run on every message. Scenario questions run only when that thing needs them. Node sends only state. Question sets are JSON files in `python/questions/`. Create them at http://127.0.0.1:3000/brain. `POST /predict` uses the file named by `key`. Add the matching customer reply in `node/src/replies.json`.
 
 POST /agent → validator → controller → **Laya** /predict → policy / tools / reply
 
 | Folder | Role |
 |---|---|
-| `python/` | **Laya** server, question list, shortlist, requirements, `.env`, and the virtualenv (`.venv`). `python/train/` is reserved for later fine-tunes. |
+| `python/` | **Laya** server, question JSON files in `python/questions/`, shortlist, requirements, `.env`, and the virtualenv (`.venv`). `python/train/` is reserved for later fine-tunes. |
 | `node/` | Agent, policy, and actions. Sends state only. |
 
 ## Why **Laya**
@@ -35,7 +35,7 @@ Each question has a type:
 
 `predict_shortlist` is how this server asks. It embeds the state and each choice label with the encoder already loaded (`embed_fn_from_agent`), keeps the closest `SHORTLIST_K` labels (20), then runs one predict on that shorter list. When a question has 20 labels or fewer, the full list goes through and the embed step is skipped. Choice probabilities are over the labels that were kept.
 
-Shared questions run on every message. Scenario questions run in a second call only after `need` is a confident choice. Node never loads the model. It sends `state` and uses the `answers` object.
+Shared questions run on every message. Scenario questions run in a second call only after `need` is a confident choice. The questions come from `python/questions/<key>.json`. Node never loads the model. It sends `state` and the file `key`, then uses the `answers` object.
 
 ## What this changes for the business
 
@@ -140,7 +140,21 @@ Drop this on any page. The script posts each message to `POST /agent` on the hos
 <script src="http://127.0.0.1:3000/widget.js" defer></script>
 ```
 
-The visitor adds an email in the widget. That address and the messages stay in local storage on this device, so a refresh keeps the same conversation. New conversation clears both. `data-endpoint` overrides the agent URL. `data-title` and `data-greeting` change the header and the first line. A sample host page is at http://127.0.0.1:3000/demo.html.
+The visitor adds an email in the widget. That address and the messages stay in local storage on this device, so a refresh keeps the same conversation. New conversation clears both. `data-endpoint` overrides the agent URL. `data-title` and `data-greeting` change the header and the first line. `data-key` sends that brain file with each message. A plain host page is at http://127.0.0.1:3000/test. On the Brain page, the chat icon beside a brain opens the widget for that file and starts a new conversation.
+
+## Brain
+
+Open http://127.0.0.1:3000/brain. That page calls Node, and Node calls Python, which writes `python/questions/<name>.json`. Python reads that file on each predict. A restart is not required after a save.
+
+`default.json` is the support set. Omit `key`, or pass `default`, to use it. Pass the file name to use another set. `billing` and `billing.json` both load `billing.json`.
+
+```bash
+curl -s http://127.0.0.1:8000/predict \
+  -H 'Content-Type: application/json' \
+  -d '{"key":"default","state":{"message":"Where is my order?"}}'
+```
+
+The same `key` can go on `POST /agent`. The agent forwards it to predict.
 
 ## Call the agent
 
@@ -204,10 +218,12 @@ Each answer is one of three shapes:
 
 `reply_kind` is a choice: `unclear`, `greeting`, `general`, and `request`. Node reads it only when no tool action was chosen. A greeting at `0.8` or above gets a hello. A general reply at `0.6` or above gets an acknowledgement. Anything else, including text like `wreoye`, asks the customer what they need.
 
-`POST /predict` returns only the answers object:
+`POST /predict` returns the answers, plus the question file it loaded:
 
 ```json
 {
+  "key": "default",
+  "file": "default.json",
   "answers": {
     "need": { "type": "choice", "choice": "order_status", "confidence": 0.91 },
     "urgency": { "type": "score", "score": 0.4, "confidence": 0.8 },

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Brain</title>
+    <link rel="stylesheet" href="/brain.css" />
+  </head>
+  <body>
+    <header>
+      <div class="top">
+        <h1>Brain</h1>
+        <a href="/test">Widget page</a>
+      </div>
+      <p>What gets read in a message. The chat icon beside a brain starts a new test chat for that file.</p>
+    </header>
+    <div class="layout">
+      <aside>
+        <p class="label">Brains</p>
+        <div id="files"></div>
+        <button class="new" type="button" id="new-set">New brain</button>
+      </aside>
+      <div class="work">
+        <div class="bar" id="actions"></div>
+        <ul class="notes">
+          <li><strong>Choice</strong> picks one label.</li>
+          <li><strong>Score</strong> places it on a scale.</li>
+          <li><strong>Noul</strong> is a yes or no.</li>
+        </ul>
+        <form id="editor"></form>
+      </div>
+    </div>
+    <dialog id="confirm-dialog">
+      <form method="dialog">
+        <p id="confirm-text"></p>
+        <div class="choices">
+          <button type="submit" value="cancel">Cancel</button>
+          <button type="submit" value="ok" id="confirm-ok">Save</button>
+        </div>
+      </form>
+    </dialog>
+    <dialog id="json-dialog">
+      <div class="dialog-head">
+        <strong id="json-title"></strong>
+        <button type="button" id="json-close">Close</button>
+      </div>
+      <pre id="json-body"></pre>
+    </dialog>
+    <script src="/widget.js" data-title="Test" data-dock="hidden"></script>
+    <script src="/brain.js"></script>
+  </body>
+</html>

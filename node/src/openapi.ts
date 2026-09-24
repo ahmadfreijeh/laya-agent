@@ -24,6 +24,25 @@ export const openapi = {
         },
       },
     },
+    "/questions": {
+      get: {
+        summary: "List question files saved for Laya",
+        responses: { "200": { description: "File names in python/questions" } },
+      },
+    },
+    "/questions/{key}": {
+      get: { summary: "Read one question file", responses: { "200": { description: "Question set" } } },
+      put: {
+        summary: "Save a question file through Laya",
+        parameters: [{ name: "key", in: "path", required: true, schema: { type: "string" } }],
+        responses: { "200": { description: "Saved file" }, "400": { description: "Invalid question set" } },
+      },
+      delete: {
+        summary: "Delete a question file",
+        parameters: [{ name: "key", in: "path", required: true, schema: { type: "string" } }],
+        responses: { "200": { description: "Deleted file" }, "404": { description: "Missing file" } },
+      },
+    },
     "/agent": {
       post: {
         summary: "Handle a customer message",
@@ -69,6 +88,10 @@ export const openapi = {
               customer: { type: "string" },
               message: { type: "string", minLength: 1 },
             },
+          },
+          key: {
+            type: "string",
+            description: "Question file in python/questions. `support` and `support.json` both load support.json. Defaults to default.",
           },
         },
       },
