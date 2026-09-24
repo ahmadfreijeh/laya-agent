@@ -16,6 +16,7 @@ const TOOLS: Record<string, (state: State) => string | void> = {
   cancel: (state) => `queued a cancellation for ${state.customer || "this customer"}`,
   replace: (state) => `queued a replacement for ${state.customer || "this customer"}`,
   account: (state) => `queued account help for ${state.customer || "this customer"}`,
+  more_help: (state) => `queued more help for ${state.customer || "this customer"}`,
   follow_up: (state) => `queued a follow-up for ${state.customer || "this customer"}`,
 };
 
@@ -46,25 +47,26 @@ export async function handle(state: State): Promise<AgentResult> {
   const { answers } = await predict({ customer, message });
   const chosen = chooseAction(answers);
 
-  console.log("chosen", chosen);
-
   const run = TOOLS[chosen];
-
-  console.log("run", run);
-
   const toolRequest = run != null;
-
-  console.log("toolRequest", toolRequest ? "yes" : "no");
-
   const ran = run?.(state);
-  console.log("ran", ran);
   const tool = toolRequest ? (typeof ran === "string" ? ran : chosen) : null;
-  console.log("tool", tool);
   const kind = replyKind(answers);
-  console.log("kind", kind);
   const socialText = toolRequest || !kind ? null : socialReply(kind);
   const action = socialText ? "reply" : chosen;
   const replyText = replies.actions[action as keyof typeof replies.actions];
   const reply = socialText ?? replyText ?? draftReply(state);
+
+  console.log("Full", {
+    chosen,
+    toolRequest,
+    ran,
+    tool,
+    kind,
+    socialText,
+    action,
+  });
+  console.log("--------------------------------");
+
   return { action, used_llm: replyText == null, tool, reply, answers };
 }

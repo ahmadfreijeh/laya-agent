@@ -23,7 +23,8 @@ THINGS_TO_DO = {
     "cancel": "stop an order or a subscription before it is fulfilled",
     "replace": "replace or exchange the item or order",
     "account": "sign-in, password, or account access",
-    "follow_up": "something done that needs a person to follow up, and none of the specific actions above",
+    "more_help": "they want a person to follow up, or they need more assistance",
+    "follow_up": "something already done that still needs a person, and none of the specific actions above",
     "other": "unclear",
 }
 

@@ -14,12 +14,13 @@
     }
   },
   "actions": {
-    "reply": "I can help with that.",
+    "reply": "This request needs more than I can handle here. One of our human agents will be in touch so you can go through it in more detail.",
     "order_status": "I'll check where that order is and update you.",
     "refund": "I logged a refund review. Billing will follow up.",
     "cancel": "I logged a cancellation request.",
     "replace": "I logged a replacement request.",
     "account": "I logged an account-access request.",
+    "more_help": "I'll have someone follow up so you can get more assistance.",
     "follow_up": "I'll pass this to the team so they can follow up."
   }
 }

@@ -3,6 +3,6 @@ torch>=2.2.0
 accelerate>=0.33.0
 huggingface_hub>=0.24.0
 python-dotenv>=1.0.1
-laya
+laya==0.3.20
 fastapi>=0.115.0
 uvicorn>=0.30.0
