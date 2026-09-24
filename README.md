@@ -1,6 +1,6 @@
 # Relay
 
-Small demo: a general **customer support agent**. The customer asks for something, **Laya** reads which thing they want done, and the agent runs that action. Shared questions run on every message. Scenario questions run only when that thing needs them. Node sends only state. Add a thing to do in `python/src/questions.py` (`THINGS_TO_DO`, and `SCENARIOS` when it needs extra questions) and in the Node action list. A chat box can call this later.
+Small demo: a general **customer support agent**. The customer asks for something, **Laya** reads which thing they want done, and the agent runs that action. Shared questions run on every message. Scenario questions run only when that thing needs them. Node sends only state. Add a thing to do in `python/src/questions.py` (`THINGS_TO_DO`, and `SCENARIOS` when it needs extra questions) and its customer reply in `node/src/replies.json`. A chat box can call this later.
 
 POST /agent → validator → controller → **Laya** /predict → policy / tools / reply
 
@@ -11,9 +11,9 @@ POST /agent → validator → controller → **Laya** /predict → policy / tool
 
 ## Why **Laya**
 
-Support work starts as a free-text message. **Laya** reads that message and answers a fixed list of questions: what the customer wants done, how urgent it is, which language to reply in, and whether they are upset. When the need is clear, it also answers the extra questions that action needs, such as why they want a refund or whether the order has already shipped.
+Support work starts as a free-text message. **Laya** reads that message alone and answers a fixed list of questions: what the customer wants done, how urgent it is, which language to reply in, whether they are upset, and what kind of reply the message needs. When the need is clear, it also answers the extra questions that action needs, such as why they want a refund or whether the order has already shipped.
 
-Those answers are what Relay acts on. The agent picks one action when **Laya** is confident, runs it, and replies. A weak or unclear read stays with a person.
+Those answers are what Relay acts on. A confident `need` runs that tool. A greeting or a general reply is used only when no tool action is chosen. Each call is only the current message.
 
 Later, a small language model will reason only when **Laya**'s score is too low to pass an action or a reply. Confident messages stay on **Laya**. That small model is the case that can use tokens.
 
@@ -102,7 +102,7 @@ cd node
 npm start
 ```
 
-Node listens on `PORT` (default `3000`) and calls `LAYA_URL` (default `http://127.0.0.1:8000`).
+Node listens on `PORT` (default `3000`) and calls `LAYA_URL` (default `http://127.0.0.1:8000`). Both come from `node/.env`. Copy `node/.env.example` if that file is missing.
 
 ## Simulation
 
@@ -131,6 +131,16 @@ Health check:
 ```bash
 curl -s http://127.0.0.1:3000/health
 ```
+
+## Embed the chat
+
+Drop this on any page. The script posts each message to `POST /agent` on the host that served it.
+
+```html
+<script src="http://127.0.0.1:3000/widget.js" defer></script>
+```
+
+The visitor adds an email in the widget. That address and the messages stay in local storage on this device, so a refresh keeps the same conversation. New conversation clears both. `data-endpoint` overrides the agent URL. `data-title` and `data-greeting` change the header and the first line. A sample host page is at http://127.0.0.1:3000/demo.html.
 
 ## Call the agent
 
@@ -176,7 +186,7 @@ Both health checks return:
 
 | Field | Meaning |
 |---|---|
-| `action` | The thing to do. One of `reply`, `order_status`, `refund`, `cancel`, `replace`, `account`, `follow_up`. `reply` is used when `need` is `other` or its confidence is below `0.8`. |
+| `action` | The thing to do. One of `reply`, `order_status`, `refund`, `cancel`, `replace`, `account`, `follow_up`. A need runs that tool only when its confidence is at least `0.7` and the chosen label's probability is at least `0.8`. `reply` is used when `need` is `other` or either bar is missed. |
 | `used_llm` | `true` when `action` has no registered handler and Relay drafts a holding reply. |
 | `tool` | What the action ran, or `null` when that action has no tool. |
 | `reply` | Text to show the customer. |
@@ -190,7 +200,9 @@ Each answer is one of three shapes:
 | `score` | `{ "type": "score", "score": 0.4, "confidence": 0.8 }` |
 | `noul` | `{ "type": "noul", "noul": 0.9, "confidence": 0.88 }` |
 
-`confidence`, `score`, and `noul` are numbers from `0` to `1`. Shared keys are always `need`, `urgency`, `language`, and `upset`.
+`confidence`, `score`, and `noul` are numbers from `0` to `1`. Shared keys are always `need`, `urgency`, `language`, `upset`, and `reply_kind`. Each predict call is the current message only.
+
+`reply_kind` is a choice: `unclear`, `greeting`, `general`, and `request`. Node reads it only when no tool action was chosen. A greeting at `0.8` or above gets a hello. A general reply at `0.6` or above gets an acknowledgement. Anything else, including text like `wreoye`, asks the customer what they need.
 
 `POST /predict` returns only the answers object:
 
@@ -216,7 +228,7 @@ Errors from `POST /agent`:
 
 ## Todo
 
-- [ ] A chat box that calls `POST /agent`.
+- [x] A chat box that calls `POST /agent`. Load `GET /widget.js` on any page.
 - [ ] A small language model that reasons only when **Laya**'s score is too low to pass an action or a reply. Confident messages stay on **Laya**. Tokens apply only on that low-score path.
 - [ ] Several actions in one message. Most actions become their own `noul` questions, so each can be true at once. Relay runs an action only when its confidence is high enough. The same action must not stay both in `need` and as a `noul`.
 - [ ] Fine-tunes in `python/train/`.

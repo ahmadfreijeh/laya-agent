@@ -1,3 +1,4 @@
+import "./config.js";
 import Table from "cli-table3";
 import figlet from "figlet";
 import ora from "ora";

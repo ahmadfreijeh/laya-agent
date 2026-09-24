@@ -8,12 +8,15 @@ export type ChoiceAnswer = {
   type: "choice";
   choice: string;
   confidence: number;
+  probabilities?: Record<string, number>;
 };
 
 export type ScoreAnswer = {
   type: "score";
   score: number;
   confidence: number;
+  probabilities?: Record<string, number>;
+  legend?: Record<string, string>;
 };
 
 export type NoulAnswer = {

@@ -1,58 +1,70 @@
 import { predict } from "../api/laya.api.js";
 import { chooseAction } from "../policies/agent.policy.js";
-import type { Action, AgentResult } from "../types/agent.js";
-import type { State } from "../types/laya.js";
+import replies from "../replies.json" with { type: "json" };
+import type { AgentResult } from "../types/agent.js";
+import type { Answers, State } from "../types/laya.js";
 
-type SupportAction = {
-  reply: string;
-  run?: (state: State) => string;
+type ReplyKind = { name: string; probability: number };
+type SocialLine = { min: number; reply: string };
+
+const social = replies.social as Record<string, SocialLine>;
+
+// Tool logic stays here. The response `tool` field is always a string.
+const TOOLS: Record<string, (state: State) => string | void> = {
+  order_status: (state) => `looked up order status for ${state.customer || "this customer"}`,
+  refund: (state) => `queued a refund review for ${state.customer || "this customer"}`,
+  cancel: (state) => `queued a cancellation for ${state.customer || "this customer"}`,
+  replace: (state) => `queued a replacement for ${state.customer || "this customer"}`,
+  account: (state) => `queued account help for ${state.customer || "this customer"}`,
+  follow_up: (state) => `queued a follow-up for ${state.customer || "this customer"}`,
 };
 
-// Add customer-support actions here. The key must match an entry in THINGS_TO_DO in python/src/questions.py.
-const ACTIONS: Record<string, SupportAction> = {
-  reply: {
-    reply: "I can help with that.",
-  },
-  order_status: {
-    reply: "I'll check where that order is and update you.",
-    run: (state) => `looked up order status for ${state.customer || "this customer"}`,
-  },
-  refund: {
-    reply: "I logged a refund review. Billing will follow up.",
-    run: (state) => `queued a refund review for ${state.customer || "this customer"}`,
-  },
-  cancel: {
-    reply: "I logged a cancellation request.",
-    run: (state) => `queued a cancellation for ${state.customer || "this customer"}`,
-  },
-  replace: {
-    reply: "I logged a replacement request.",
-    run: (state) => `queued a replacement for ${state.customer || "this customer"}`,
-  },
-  account: {
-    reply: "I logged an account-access request.",
-    run: (state) => `queued account help for ${state.customer || "this customer"}`,
-  },
-  follow_up: {
-    reply: "I'll pass this to the team so they can follow up.",
-    run: (state) => `queued a follow-up for ${state.customer || "this customer"}`,
-  },
-};
+function replyKind(answers: Answers): ReplyKind | null {
+  const answer = answers.reply_kind;
+  if (answer?.type !== "choice" || !answer.probabilities) return null;
+  let best: ReplyKind | null = null;
+  for (const [name, probability] of Object.entries(answer.probabilities)) {
+    if (!best || probability > best.probability) best = { name, probability };
+  }
+  return best;
+}
+
+function socialReply(kind: ReplyKind): string | null {
+  if (kind.name === "request") return null;
+  const route = social[kind.name];
+  const line = route && kind.probability >= route.min ? route : replies.unclear;
+  return line.reply;
+}
 
 function draftReply(state: State): string {
   const message = state.message || "";
-  return (
-    "Thanks for the message. A teammate will review it and reply shortly. " +
-    `We have your note: ${message.slice(0, 120)}`
-  );
+  return `${replies.holding}${message.slice(0, 120)}`;
 }
 
 export async function handle(state: State): Promise<AgentResult> {
-  const { answers } = await predict(state);
-  const action: Action = chooseAction(answers);
-  const registered = ACTIONS[action];
-  const usedLlm = !registered;
-  const tool = registered?.run?.(state) ?? null;
-  const reply = registered ? registered.reply : draftReply(state);
-  return { action, used_llm: usedLlm, tool, reply, answers };
+  const { customer, message } = state;
+  const { answers } = await predict({ customer, message });
+  const chosen = chooseAction(answers);
+
+  console.log("chosen", chosen);
+
+  const run = TOOLS[chosen];
+
+  console.log("run", run);
+
+  const toolRequest = run != null;
+
+  console.log("toolRequest", toolRequest ? "yes" : "no");
+
+  const ran = run?.(state);
+  console.log("ran", ran);
+  const tool = toolRequest ? (typeof ran === "string" ? ran : chosen) : null;
+  console.log("tool", tool);
+  const kind = replyKind(answers);
+  console.log("kind", kind);
+  const socialText = toolRequest || !kind ? null : socialReply(kind);
+  const action = socialText ? "reply" : chosen;
+  const replyText = replies.actions[action as keyof typeof replies.actions];
+  const reply = socialText ?? replyText ?? draftReply(state);
+  return { action, used_llm: replyText == null, tool, reply, answers };
 }

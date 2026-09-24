@@ -1,0 +1,25 @@
+{
+  "holding": "Thanks for the message. A teammate will review it and reply shortly. We have your note: ",
+  "unclear": {
+    "reply": "I didn't catch that. What can I help you with?"
+  },
+  "social": {
+    "greeting": {
+      "min": 0.8,
+      "reply": "Hi. How can I help you today?"
+    },
+    "general": {
+      "min": 0.6,
+      "reply": "Glad to hear it. Tell me if there is something I can help with."
+    }
+  },
+  "actions": {
+    "reply": "I can help with that.",
+    "order_status": "I'll check where that order is and update you.",
+    "refund": "I logged a refund review. Billing will follow up.",
+    "cancel": "I logged a cancellation request.",
+    "replace": "I logged a replacement request.",
+    "account": "I logged an account-access request.",
+    "follow_up": "I'll pass this to the team so they can follow up."
+  }
+}

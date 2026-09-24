@@ -11,14 +11,17 @@
 # would conflict.
 
 SHORTLIST_K = 20
-MIN_NEED_CONF = 0.8
+# Both must clear before a need runs. `confidence` is how peaked the
+# distribution is. `probability` is the chosen label's own share.
+MIN_NEED_PROB = 0.6
+MIN_NEED_CONF = 0.7
 
 THINGS_TO_DO = {
     "reply": "they want an answer or an explanation in the chat",
     "order_status": "where an order is, or whether it has shipped or arrived",
-    "refund": "money back for a charge or an order",
-    "cancel": "stop an order or a subscription",
-    "replace": "a replacement for a broken, missing, or wrong item",
+    "refund": "refund the money",
+    "cancel": "stop an order or a subscription before it is fulfilled",
+    "replace": "replace or exchange the item or order",
     "account": "sign-in, password, or account access",
     "follow_up": "something done that needs a person to follow up, and none of the specific actions above",
     "other": "unclear",
@@ -50,6 +53,18 @@ SHARED_QUESTIONS = {
     "upset": {
         "type": "noul",
         "instructions": "Is the customer upset or complaining?",
+    },
+    # Probabilities are keyed by these names. Node uses them for a greeting,
+    # a general reply, or unclear text. A request follows `need`.
+    "reply_kind": {
+        "type": "choice",
+        "instructions": "What kind of message is this?",
+        "criteria": {
+            "unclear": "unclear or not real words",
+            "greeting": "hello, hi, or good morning",
+            "general": "thanks, okay, or goodbye",
+            "request": "a request for help",
+        },
     },
 }
 

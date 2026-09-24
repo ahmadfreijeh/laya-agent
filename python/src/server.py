@@ -6,7 +6,7 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 
 from src.model import load_model
-from src.questions import MIN_NEED_CONF, SCENARIOS, SHARED_QUESTIONS, SHORTLIST_K
+from src.questions import MIN_NEED_CONF, MIN_NEED_PROB, SCENARIOS, SHARED_QUESTIONS, SHORTLIST_K
 
 
 class PredictIn(BaseModel):
@@ -34,11 +34,20 @@ def score(model, embed_fn, state: Any, questions: dict) -> dict:
     return result["answers"]
 
 
+def need_is_clear(need: dict) -> bool:
+    if need.get("type") != "choice" or need.get("choice") in (None, "other"):
+        return False
+    if need.get("confidence", 0) < MIN_NEED_CONF:
+        return False
+    probability = (need.get("probabilities") or {}).get(need.get("choice"))
+    if probability is None:
+        return True
+    return probability >= MIN_NEED_PROB
+
+
 def scenario_questions(answers: dict) -> dict | None:
     need = answers.get("need") or {}
-    if need.get("type") != "choice":
-        return None
-    if need.get("confidence", 0) < MIN_NEED_CONF or need.get("choice") == "other":
+    if not need_is_clear(need):
         return None
     return SCENARIOS.get(need.get("choice"))
 

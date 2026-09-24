@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Relay chat demo</title>
+    <style>
+      body {
+        margin: 0;
+        font-family: ui-sans-serif, system-ui, sans-serif;
+        color: #172033;
+        background: #f6f7f9;
+      }
+      main {
+        max-width: 640px;
+        margin: 0 auto;
+        padding: 64px 24px;
+      }
+      code {
+        font-size: 14px;
+      }
+      pre {
+        padding: 16px;
+        overflow: auto;
+        background: #fff;
+        border-radius: 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Any website</h1>
+      <p>This page is only a host. The chat in the corner comes from the script tag below.</p>
+      <pre><code>&lt;script src="http://127.0.0.1:3000/widget.js" defer&gt;&lt;/script&gt;</code></pre>
+    </main>
+    <script src="/widget.js" defer></script>
+  </body>
+</html>

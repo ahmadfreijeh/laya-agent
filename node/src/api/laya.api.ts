@@ -1,3 +1,4 @@
+import "../config.js";
 import type { Answers, State } from "../types/laya.js";
 
 const LAYA_URL = process.env.LAYA_URL || "http://127.0.0.1:8000";
