@@ -3,16 +3,16 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Brain</title>
+    <title>Brains</title>
     <link rel="stylesheet" href="/brain.css" />
   </head>
   <body>
     <header>
       <div class="top">
-        <h1>Brain</h1>
+        <h1>Brains</h1>
         <a href="/test">Widget page</a>
       </div>
-      <p>What gets read in a message. The chat icon beside a brain starts a new test chat for that file.</p>
+      <p>A brain decides what Laya reads from each customer message: what they need, how urgent it is, and what to ask next.</p>
     </header>
     <div class="layout">
       <aside>
@@ -21,18 +21,38 @@
         <button class="new" type="button" id="new-set">New brain</button>
       </aside>
       <div class="work">
-        <div class="bar" id="actions"></div>
-        <ul class="notes">
-          <li><strong>Choice</strong> picks one label.</li>
-          <li><strong>Score</strong> places it on a scale.</li>
-          <li><strong>Noul</strong> is a yes or no.</li>
-        </ul>
+        <div class="bar" id="bar">
+          <div class="title">
+            <strong id="bar-name"></strong>
+            <span class="dirty" id="bar-dirty" hidden>Unsaved changes</span>
+          </div>
+          <div class="tools">
+            <button class="tool" type="button" id="test-open" title="Chat with the saved version">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7.2 18.2 4.8 20.5V7.4A2.4 2.4 0 0 1 7.2 5h9.6a2.4 2.4 0 0 1 2.4 2.4v8.4a2.4 2.4 0 0 1-2.4 2.4H7.2Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
+              Test
+            </button>
+            <button class="tool" type="button" id="json-open">JSON</button>
+            <button class="tool" type="button" id="copy-open">Save as copy</button>
+            <button class="primary" type="submit" form="editor" id="save">Save</button>
+          </div>
+          <p class="status" id="status" hidden></p>
+        </div>
+        <section class="try">
+          <label for="try-message">Try a message</label>
+          <div class="try-row">
+            <textarea id="try-message" rows="2" placeholder="I was charged twice for my order"></textarea>
+            <button class="primary" type="button" id="try-run">Run</button>
+          </div>
+          <p class="hint">Runs the brain as it is on screen, unsaved changes included.</p>
+          <div id="try-result"></div>
+        </section>
         <form id="editor"></form>
       </div>
     </div>
     <dialog id="confirm-dialog">
       <form method="dialog">
         <p id="confirm-text"></p>
+        <label id="confirm-field" hidden>Name<input id="confirm-input" autocomplete="off" /></label>
         <div class="choices">
           <button type="submit" value="cancel">Cancel</button>
           <button type="submit" value="ok" id="confirm-ok">Save</button>

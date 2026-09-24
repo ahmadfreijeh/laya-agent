@@ -11,6 +11,7 @@ from src.questions import (
     delete_questions,
     list_questions,
     load_questions,
+    normalize_file,
     save_questions,
 )
 
@@ -21,6 +22,11 @@ class PredictIn(BaseModel):
         default="default",
         description="Question file name in python/questions. `support` and `support.json` both load support.json.",
     )
+
+
+class TryIn(BaseModel):
+    state: Any
+    questions: dict = Field(description="A question file body. It is checked but not saved.")
 
 
 @asynccontextmanager
@@ -66,6 +72,18 @@ def scenario_questions(answers: dict, spec: dict) -> dict | None:
     return (spec.get("scenarios") or {}).get(need.get("choice"))
 
 
+def run(spec: dict, state: Any) -> dict:
+    answers = score(app.state.model, app.state.embed_fn, state, spec["shared"], spec["shortlist_k"])
+    need_clear = need_is_clear(answers.get("need") or {}, spec)
+    extra = scenario_questions(answers, spec)
+    if extra:
+        answers = {
+            **answers,
+            **score(app.state.model, app.state.embed_fn, state, extra, spec["shortlist_k"]),
+        }
+    return {"answers": answers, "need_clear": need_clear, "followups": sorted(extra or {})}
+
+
 @app.get("/health")
 def health() -> dict:
     return {"ok": True}
@@ -106,12 +124,14 @@ def predict(body: PredictIn) -> dict:
         loaded = load_questions(body.key)
     except QuestionError as err:
         raise_question_error(err)
-    spec = loaded["questions"]
-    answers = score(app.state.model, app.state.embed_fn, body.state, spec["shared"], spec["shortlist_k"])
-    extra = scenario_questions(answers, spec)
-    if extra:
-        answers = {
-            **answers,
-            **score(app.state.model, app.state.embed_fn, body.state, extra, spec["shortlist_k"]),
-        }
-    return {"answers": answers, "key": loaded["key"], "file": loaded["file"]}
+    result = run(loaded["questions"], body.state)
+    return {"answers": result["answers"], "key": loaded["key"], "file": loaded["file"]}
+
+
+@app.post("/questions/try")
+def try_questions(body: TryIn) -> dict:
+    try:
+        spec = normalize_file(body.questions)
+    except QuestionError as err:
+        raise_question_error(err)
+    return run(spec, body.state)

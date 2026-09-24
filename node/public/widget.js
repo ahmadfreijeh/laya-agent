@@ -6,6 +6,10 @@
   var endpoint = script.dataset.endpoint || new URL("/agent", script.src).href;
   var title = script.dataset.title || "Support";
   var greeting = script.dataset.greeting || "Hi. How can we help?";
+  var brainsUrl = script.dataset.brains || new URL("/questions", script.src).href;
+  var pickedName = "relay-chat-brain:" + endpoint;
+  var brains = [];
+  var picked = loadPicked();
   var storageKey = storageName();
 
   var icons = {
@@ -45,6 +49,8 @@
     ".who{margin:2px 0 0;font-size:12px;color:#6b6b70;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}" +
     ".who:empty,.brain:empty{display:none;}" +
     ".brain{margin:2px 0 0;font-size:12px;color:#6b6b70;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}" +
+    ".picker{display:block;max-width:100%;margin:4px 0 0;padding:3px 22px 3px 8px;border:1px solid #e4e4e7;border-radius:8px;background:#fafafa url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M7 10l5 5 5-5' fill='none' stroke='%236b6b70' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E\") no-repeat right 5px center/12px;font:inherit;font-size:12px;color:#1c1c1e;cursor:pointer;-webkit-appearance:none;appearance:none;}" +
+    ".picker:focus-visible{outline:2px solid #3b6cff;outline-offset:2px;}" +
     ".icon{width:32px;height:32px;border:0;border-radius:10px;background:transparent;color:#1c1c1e;cursor:pointer;display:grid;place-items:center;flex:none;}" +
     ".icon:hover{background:#f4f4f5;}" +
     ".actions{margin-left:auto;display:flex;}" +
@@ -75,7 +81,7 @@
     "[hidden]{display:none !important;}" +
     "</style>" +
     '<div class="panel" role="dialog" aria-label="' + escapeAttr(title) + '">' +
-    '<div class="head"><span class="brand">' + icons.agent + '</span><div class="titles"><h2></h2><p class="who"></p><p class="brain"></p></div>' +
+    '<div class="head"><span class="brand">' + icons.agent + '</span><div class="titles"><h2></h2><p class="who"></p><p class="brain"></p><select class="picker" aria-label="Brain" hidden></select></div>' +
     '<div class="actions"><button class="icon fresh" type="button" aria-label="New conversation">' + icons.fresh + "</button>" +
     '<button class="icon close" type="button" aria-label="Close chat">' + icons.close + "</button></div></div>" +
     '<div class="log"></div>' +
@@ -100,6 +106,7 @@
   var confirmBar = root.querySelector(".confirm");
   var who = root.querySelector(".who");
   var brain = root.querySelector(".brain");
+  var picker = root.querySelector(".picker");
   root.querySelector(".head h2").textContent = title;
   showBrain();
   if (dockHidden) {
@@ -128,18 +135,14 @@
     if (!panel.classList.contains("open")) toggle();
     else focusEntry();
   });
-  new MutationObserver(function () {
-    showBrain();
-    var next = storageName();
-    if (next === storageKey) return;
-    storageKey = next;
-    generation += 1;
-    convo = load();
-    confirmBar.hidden = true;
-    send.disabled = false;
-    input.value = "";
-    render();
-  }).observe(script, { attributes: true, attributeFilter: ["data-key"] });
+  new MutationObserver(switchBrain).observe(script, { attributes: true, attributeFilter: ["data-key"] });
+  picker.addEventListener("change", function () {
+    picked = picker.value === "default" ? "" : picker.value;
+    savePicked();
+    switchBrain();
+    focusEntry();
+  });
+  loadBrains();
   input.addEventListener("keydown", function (event) {
     if (event.key === "Enter" && !event.shiftKey) {
       event.preventDefault();
@@ -150,8 +153,68 @@
   render();
   document.body.appendChild(host);
 
-  function brainName() {
+  function fixedBrain() {
     return (script.dataset.key || "").trim().replace(/\.json$/i, "");
+  }
+
+  function brainName() {
+    return fixedBrain() || picked;
+  }
+
+  function switchBrain() {
+    showBrain();
+    var next = storageName();
+    if (next === storageKey) return;
+    storageKey = next;
+    generation += 1;
+    convo = load();
+    confirmBar.hidden = true;
+    send.disabled = false;
+    input.value = "";
+    render();
+  }
+
+  function loadBrains() {
+    fetch(brainsUrl)
+      .then(function (res) {
+        return res.ok ? res.json() : { files: [] };
+      })
+      .then(function (body) {
+        brains = (body.files || []).map(function (file) {
+          return file.key;
+        });
+        if (picked && brains.indexOf(picked) === -1) picked = "";
+        if (!picked && brains.length && brains.indexOf("default") === -1) picked = brains[0];
+        picker.replaceChildren();
+        brains.forEach(function (key) {
+          var option = document.createElement("option");
+          option.value = key;
+          option.textContent = key;
+          picker.appendChild(option);
+        });
+        picker.value = picked || "default";
+        switchBrain();
+      })
+      .catch(function () {
+        /* without the list the widget uses data-key or the server's default brain */
+      });
+  }
+
+  function loadPicked() {
+    try {
+      return localStorage.getItem(pickedName) || "";
+    } catch (err) {
+      return "";
+    }
+  }
+
+  function savePicked() {
+    try {
+      if (picked) localStorage.setItem(pickedName, picked);
+      else localStorage.removeItem(pickedName);
+    } catch (err) {
+      /* the choice lasts for this page when storage is blocked */
+    }
   }
 
   function storageName() {
@@ -160,8 +223,9 @@
   }
 
   function showBrain() {
-    var key = brainName();
+    var key = fixedBrain();
     brain.textContent = key ? "Testing " + key : "";
+    picker.hidden = Boolean(key) || brains.length < 2;
   }
 
   function requestBody(text) {

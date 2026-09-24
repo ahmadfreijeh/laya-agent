@@ -30,9 +30,11 @@
   <body>
     <main>
       <h1>Any website</h1>
-      <p>This page is only a host. The chat in the corner comes from the script tag below. It uses the default brain.</p>
+      <p>This page is only a host. The chat in the corner comes from the script tag below. With more than one brain, pick one from the menu under the chat title.</p>
       <p><a href="/brain">Edit the brain</a></p>
       <pre><code>&lt;script src="http://127.0.0.1:3000/widget.js" defer&gt;&lt;/script&gt;</code></pre>
+      <p>To lock the chat to one brain and hide the menu, add <code>data-key</code>:</p>
+      <pre><code>&lt;script src="http://127.0.0.1:3000/widget.js" data-key="support" defer&gt;&lt;/script&gt;</code></pre>
     </main>
     <script src="/widget.js" defer></script>
   </body>

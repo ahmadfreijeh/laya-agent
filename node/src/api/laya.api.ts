@@ -71,6 +71,19 @@ export function saveQuestionFile(key: string, questions: unknown): Promise<Quest
   }) as Promise<QuestionFile>;
 }
 
+export type TryResult = {
+  answers: Answers;
+  need_clear: boolean;
+  followups: string[];
+};
+
+export function tryQuestionFile(state: State, questions: unknown): Promise<TryResult> {
+  return laya("/questions/try", {
+    method: "POST",
+    body: JSON.stringify({ state, questions }),
+  }) as Promise<TryResult>;
+}
+
 export function deleteQuestionFile(key: string): Promise<QuestionFile> {
   return laya(`/questions/${encodeURIComponent(key)}`, { method: "DELETE" }) as Promise<QuestionFile>;
 }

@@ -30,6 +30,23 @@ export const openapi = {
         responses: { "200": { description: "File names in python/questions" } },
       },
     },
+    "/questions/try": {
+      post: {
+        summary: "Run an unsaved question set against one message",
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              example: { message: "I was charged twice", questions: { shared: {}, scenarios: {} } },
+            },
+          },
+        },
+        responses: {
+          "200": { description: "Answers, whether need cleared the bars, and which follow-ups ran" },
+          "400": { description: "Invalid question set" },
+        },
+      },
+    },
     "/questions/{key}": {
       get: { summary: "Read one question file", responses: { "200": { description: "Question set" } } },
       put: {

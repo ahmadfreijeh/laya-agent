@@ -5,6 +5,7 @@ import {
   getQuestionFile,
   listQuestionFiles,
   saveQuestionFile,
+  tryQuestionFile,
 } from "../api/laya.api.js";
 
 const KEY = /^[A-Za-z0-9][A-Za-z0-9_-]{0,63}(\.json)?$/i;
@@ -51,6 +52,23 @@ export async function putQuestions(req: Request, res: Response): Promise<void> {
   }
   try {
     res.json(await saveQuestionFile(key, req.body));
+  } catch (err) {
+    fail(res, err);
+  }
+}
+
+export async function tryQuestions(req: Request, res: Response): Promise<void> {
+  const { message, questions } = req.body ?? {};
+  if (typeof message !== "string" || !message.trim()) {
+    res.status(400).json({ error: "message is required" });
+    return;
+  }
+  if (questions == null || typeof questions !== "object" || Array.isArray(questions)) {
+    res.status(400).json({ error: "question file must be a JSON object" });
+    return;
+  }
+  try {
+    res.json(await tryQuestionFile({ message: message.trim() }, questions));
   } catch (err) {
     fail(res, err);
   }

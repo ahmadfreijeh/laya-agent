@@ -80,6 +80,8 @@ def delete_questions(key: str) -> dict[str, Any]:
     path = path_for(key)
     if not path.is_file():
         raise QuestionError(f"no question file named {path.name}", 404)
+    if len(list_questions()) <= 1:
+        raise QuestionError("this is the only question file, so it can't be deleted", 409)
     path.unlink()
     return {"key": path.stem, "file": path.name, "deleted": True}
 

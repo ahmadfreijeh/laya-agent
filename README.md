@@ -140,7 +140,7 @@ Drop this on any page. The script posts each message to `POST /agent` on the hos
 <script src="http://127.0.0.1:3000/widget.js" defer></script>
 ```
 
-The visitor adds an email in the widget. That address and the messages stay in local storage on this device, so a refresh keeps the same conversation. New conversation clears both. `data-endpoint` overrides the agent URL. `data-title` and `data-greeting` change the header and the first line. `data-key` sends that brain file with each message. A plain host page is at http://127.0.0.1:3000/test. On the Brain page, the chat icon beside a brain opens the widget for that file and starts a new conversation.
+The visitor adds an email in the widget. That address and the messages stay in local storage on this device, so a refresh keeps the same conversation. New conversation clears both. `data-endpoint` overrides the agent URL. `data-title` and `data-greeting` change the header and the first line. `data-key` locks the chat to that brain file and hides the brain menu. Without it, the widget lists brains from `/questions` (or `data-brains`) and shows a menu under the title when there is more than one; the choice is remembered on this device, and each brain keeps its own conversation. A plain host page is at http://127.0.0.1:3000/test. On the Brain page, **Test** opens the widget for the saved brain and starts a new conversation. **Try a message** runs the brain as it is on screen, unsaved changes included, and shows each answer and which follow-ups ran.
 
 ## Brain
 
