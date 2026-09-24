@@ -186,7 +186,7 @@ Both health checks return:
 
 | Field | Meaning |
 |---|---|
-| `action` | The thing to do. One of `reply`, `order_status`, `refund`, `cancel`, `replace`, `account`, `follow_up`. A need runs that tool only when its confidence is at least `0.7` and the chosen label's probability is at least `0.8`. `reply` is used when `need` is `other` or either bar is missed. |
+| `action` | The thing to do. One of `reply`, `order_status`, `refund`, `cancel`, `replace`, `account`, `more_help`, `follow_up`. A need runs that tool only when its confidence is at least `0.7` and the chosen label's probability is at least `0.8`. `reply` is used when `need` is `other` or either bar is missed. |
 | `used_llm` | `true` when `action` has no registered handler and Relay drafts a holding reply. |
 | `tool` | What the action ran, or `null` when that action has no tool. |
 | `reply` | Text to show the customer. |
