@@ -1,9 +1,11 @@
+import { platform } from "./platform.js";
+
 export const openapi = {
   openapi: "3.0.3",
   info: {
-    title: "Relay (Node)",
-    version: "0.1.0",
-    description: "General customer support agent. The customer asks for something; Laya reads the need and the agent runs the matching action.",
+    title: `${platform.name} (Node)`,
+    version: platform.version,
+    description: `General customer support agent. The customer asks for something; ${platform.name} reads the need and the agent runs the matching action.`,
   },
   paths: {
     "/health": {

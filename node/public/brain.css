@@ -5,7 +5,6 @@
   display: grid;
   grid-template-columns: 200px 1fr;
   gap: 40px;
-  border-top: 1px solid var(--line);
 }
 aside { padding-top: 20px; align-self: start; position: sticky; top: 0; }
 .work { min-width: 0; }

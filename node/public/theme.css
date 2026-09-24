@@ -2,7 +2,6 @@
   max-width: 1080px;
   margin: 0 auto;
   padding: 0 24px 64px;
-  border-top: 1px solid var(--line);
 }
 .theme-main .work { max-width: 560px; }
 .side-left .theme-main .work { margin-left: auto; }

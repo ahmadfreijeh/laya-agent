@@ -51,7 +51,8 @@ button:disabled { cursor: default; }
 .topnav-links a:hover { color: var(--ink); }
 .topnav-links a[aria-current="page"] { color: var(--ink); border-bottom-color: var(--ink); }
 
-.page-head { max-width: 1080px; margin: 0 auto; padding: 28px 24px 20px; }
+.page-head { max-width: 1080px; margin: 0 auto; padding: 28px 24px 0; }
+.page-head::after { content: ""; display: block; margin-top: 20px; border-bottom: 1px solid var(--line); }
 .page-head p { margin: 4px 0 0; color: var(--text-2); max-width: 640px; }
 
 .hint, .note { margin: 0; color: var(--text-2); font-size: 13px; }
