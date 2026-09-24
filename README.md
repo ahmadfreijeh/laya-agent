@@ -104,6 +104,10 @@ npm start
 
 Node listens on `PORT` (default `3000`) and calls `LAYA_URL` (default `http://127.0.0.1:8000`). Both come from `node/.env`. Copy `node/.env.example` if that file is missing.
 
+## Host on a VPS
+
+To put this on a public domain with nginx and HTTPS, follow **[HOSTING.md](HOSTING.md)**. That file is command-based: required steps (box, DNS, install, cache Laya, systemd, firewall, nginx, SSL) and optional ones (www, extra cache path, password on `/brain` and `/theme`).
+
 ## Simulation
 
 With **Laya** running, play a short customer conversation through the agent. The log prints the reply and every answer Python returned.
