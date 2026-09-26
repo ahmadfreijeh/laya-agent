@@ -84,6 +84,16 @@ textarea[data-field="greeting"] { min-height: 56px; }
 .reset-defaults { margin-top: 20px; padding: 0; border: 0; background: transparent; color: var(--text-2); font-size: 13px; }
 .reset-defaults:hover { color: var(--ink); text-decoration: underline; }
 
+.embed-result { width: min(560px, calc(100vw - 32px)); padding: 24px; border: 1px solid var(--line-2); border-radius: 10px; background: var(--paper); }
+.embed-result h2 { margin-bottom: 5px; }
+.embed-result p { margin: 0 0 14px; color: var(--text-2); font-size: 13px; }
+.embed-result pre { margin: 0 0 12px; padding: 14px; overflow-x: auto; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); white-space: pre-wrap; overflow-wrap: anywhere; }
+.embed-result .copy-status { min-height: 18px; margin-bottom: 10px; }
+.embed-actions { display: flex; justify-content: flex-end; gap: 8px; }
+#save.loading::before { content: ""; width: 12px; height: 12px; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: save-spin .7s linear infinite; }
+@keyframes save-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { #save.loading::before { animation-duration: 2s; } }
+
 @media (max-width: 1040px) {
   .theme-main .work { margin-right: 420px; max-width: none; }
   .side-left .theme-main .work { margin: 0 0 0 420px; }

@@ -10,8 +10,8 @@
   <body>
     <%- include("partials/nav", { active: "theme" }) %>
     <header class="page-head">
-      <h1>Widget theme</h1>
-      <p>How the chat looks on every site that loads the widget. The chat in the corner is a live preview.</p>
+      <h1>Build a widget theme</h1>
+      <p>Choose a look, preview it in the corner, then save a script for your site. Each save creates a separate theme.</p>
     </header>
     <main class="theme-main">
       <div class="work">
@@ -22,7 +22,8 @@
           </div>
           <div class="tools">
             <button class="tool" type="button" id="discard">Discard</button>
-            <button class="primary" type="submit" form="theme-form" id="save">Save</button>
+            <button class="tool" type="button" id="view-embed" hidden>View saved script</button>
+            <button class="primary" type="submit" form="theme-form" id="save">Save new theme</button>
           </div>
           <p class="status" id="status" hidden></p>
         </div>
@@ -71,12 +72,22 @@
         </form>
       </div>
     </main>
+    <dialog class="embed-result" id="embed-result" aria-labelledby="embed-title">
+      <h2 id="embed-title">Your saved widget script</h2>
+      <p>Paste this before the closing <code>&lt;/body&gt;</code> tag on your site. This script keeps the theme you just saved.</p>
+      <pre><code id="embed-code"></code></pre>
+      <p class="copy-status" id="copy-status" role="status" aria-live="polite"></p>
+      <div class="embed-actions">
+        <button class="tool" type="button" id="close-embed">Done</button>
+        <button class="primary" type="button" id="copy-embed">Copy script</button>
+      </div>
+    </dialog>
     <dialog id="confirm-dialog">
       <form method="dialog">
         <p id="confirm-text"></p>
         <div class="choices">
           <button type="submit" value="cancel">Cancel</button>
-          <button type="submit" value="ok" id="confirm-ok">Replace</button>
+          <button type="submit" value="ok" id="confirm-ok">Create theme</button>
         </div>
       </form>
     </dialog>

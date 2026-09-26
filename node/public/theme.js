@@ -11,9 +11,13 @@ const formEl = document.getElementById("theme-form");
 const saveEl = document.getElementById("save");
 const statusEl = document.getElementById("status");
 const widgetScript = document.querySelector('script[src="/widget.js"]');
+const embedResult = document.getElementById("embed-result");
+const embedCode = document.getElementById("embed-code");
+const copyStatus = document.getElementById("copy-status");
 let saved = null;
 let defaults = null;
 let draft = null;
+let isSaving = false;
 
 document.getElementById("colors").innerHTML = COLORS.map(
   (color) => `<div class="color">
@@ -68,6 +72,19 @@ document.getElementById("logo-remove").addEventListener("click", () => {
   fill();
 });
 document.getElementById("logo-file").addEventListener("change", onLogoFile);
+document.getElementById("copy-embed").addEventListener("click", async () => {
+  try {
+    await navigator.clipboard.writeText(embedCode.textContent);
+    copyStatus.textContent = "Script copied.";
+  } catch {
+    copyStatus.textContent = "Could not copy the script. Select and copy it from the box.";
+  }
+});
+document.getElementById("close-embed").addEventListener("click", () => embedResult.close());
+document.getElementById("view-embed").addEventListener("click", () => {
+  copyStatus.textContent = "";
+  embedResult.showModal();
+});
 const confirmDialog = document.getElementById("confirm-dialog");
 confirmDialog.addEventListener("click", (event) => {
   if (event.target === confirmDialog) confirmDialog.close();
@@ -83,7 +100,7 @@ async function load() {
     const res = await fetch("/widget/theme");
     const body = await res.json();
     if (!res.ok) throw new Error(body.error || "Could not load the theme");
-    saved = body.theme;
+    saved = body.defaults;
     defaults = body.defaults;
     draft = { ...saved };
     fill();
@@ -149,7 +166,7 @@ function refresh() {
   const dirty = isDirty();
   document.getElementById("dirty").hidden = !dirty;
   document.getElementById("discard").disabled = !dirty;
-  saveEl.disabled = !dirty;
+  saveEl.disabled = !draft || isSaving;
   if (dirty) setStatus("");
   const box = document.getElementById("logo-box");
   box.replaceChildren();
@@ -180,19 +197,24 @@ function problem() {
 }
 
 async function save() {
+  if (isSaving) return;
   const issue = problem();
   if (issue) {
     setStatus(issue, true);
     return;
   }
   const ok = await askConfirm(
-    "Replace the current widget theme? Every site using the widget gets the new look the next time it loads.",
+    "Create a separate theme and script? Earlier scripts will keep their saved looks. You can reset the form or change it again to create another theme.",
   );
   if (!ok) return;
+  isSaving = true;
   saveEl.disabled = true;
+  saveEl.classList.add("loading");
+  saveEl.textContent = "Saving…";
+  saveEl.setAttribute("aria-busy", "true");
   try {
-    const res = await fetch("/widget/theme", {
-      method: "PUT",
+    const res = await fetch("/widget/themes", {
+      method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ ...draft, title: draft.title.trim(), greeting: draft.greeting.trim() }),
     });
@@ -201,10 +223,22 @@ async function save() {
     saved = body.theme;
     draft = { ...saved };
     fill();
-    setStatus("Saved. Sites pick up the new look the next time the widget loads.");
+    const widgetUrl = new URL("/widget.js", window.location.origin).href;
+    const themeUrl = new URL(body.themePath, window.location.origin).href;
+    embedCode.textContent = `<script src="${widgetUrl}" data-theme="${themeUrl}" defer></script>`;
+    document.getElementById("view-embed").hidden = false;
+    copyStatus.textContent = "";
+    embedResult.showModal();
+    setStatus("Theme saved. Open the script again with View saved script.");
   } catch (err) {
-    setStatus(err.message, true);
     refresh();
+    setStatus(err.message, true);
+  } finally {
+    isSaving = false;
+    saveEl.disabled = !draft;
+    saveEl.classList.remove("loading");
+    saveEl.textContent = "Save new theme";
+    saveEl.removeAttribute("aria-busy");
   }
 }
 
