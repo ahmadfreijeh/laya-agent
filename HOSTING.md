@@ -117,7 +117,10 @@ LAYA_URL=http://127.0.0.1:8000
 
 ```bash
 npm install
+npm run build
 ```
+
+Ploi NodeJS (PM2): port `3000`, start command `npm start` (runs `node dist/server.js`). Deploy script should `npm install` and `npm run build` in `node/` before Ploi reloads PM2. Do not start a second PM2 app by hand.
 
 ---
 
@@ -150,6 +153,7 @@ uvicorn src.server:app --host 127.0.0.1 --port 8000
 ```bash
 # session 2 — agent
 cd $APP/node
+npm run build
 npm start
 ```
 
@@ -381,7 +385,7 @@ sudo nginx -t && sudo systemctl reload nginx
 # restart after a git pull
 cd $APP && git pull
 cd $APP/python && source .venv/bin/activate && pip install -r requirements.txt
-cd $APP/node && npm install
+cd $APP/node && npm install && npm run build
 sudo systemctl restart laya.service
 sudo systemctl restart relay.service
 
