@@ -329,53 +329,7 @@ Node already allows any origin for the widget.
 
 ---
 
-## 12. Lock down /brain — Optional (recommended)
-
-The brain editor can change `python/questions/`. On a public VPS, put a password on the editor and its write requests. The theme builder stays public and saves each theme separately.
-
-```bash
-sudo apt install -y apache2-utils
-sudo htpasswd -c /etc/nginx/.htpasswd-relay admin
-```
-
-Then use these locations in `/etc/nginx/sites-available/relay`. Remove any older `location /theme` password block so `/theme` uses the public `location /` route:
-
-```nginx
-    location / {
-        proxy_pass http://127.0.0.1:3000;
-        proxy_http_version 1.1;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-    }
-
-    location /brain {
-        auth_basic "Relay admin";
-        auth_basic_user_file /etc/nginx/.htpasswd-relay;
-        proxy_pass http://127.0.0.1:3000;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-    }
-
-    location /questions/ {
-        auth_basic "Relay admin";
-        auth_basic_user_file /etc/nginx/.htpasswd-relay;
-        proxy_pass http://127.0.0.1:3000;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-    }
-```
-
-```bash
-sudo nginx -t && sudo systemctl reload nginx
-```
-
-`/theme`, `/widget/themes`, `/agent`, `/test`, and `/widget.js` stay public. Saving or deleting a brain requires the `/brain` credentials.
+All application URLs are public, including `/brain` and `/questions`. Visitors can create, edit, and delete brains without signing in. Use the single `location /` proxy above for all routes.
 
 ---
 
