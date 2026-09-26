@@ -2,6 +2,8 @@
 
 Two local servers that turn a customer message into one support action and a fixed reply.
 
+[Try the live demo](https://relay.ahmadfreijeh.com/).
+
 **Laya** (Python) reads the current message and answers a question file. **Relay** (Node) picks an action from `need`, runs a stub tool, and returns a template from `replies.json`. There is no LLM and no real order, billing, or account backend.
 
 ```
