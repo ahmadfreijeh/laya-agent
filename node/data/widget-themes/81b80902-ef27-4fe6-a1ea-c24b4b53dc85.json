@@ -1,0 +1,13 @@
+{
+  "title": "Support jdkfs",
+  "greeting": "Hi. How can we help?",
+  "logo": "",
+  "primary": "#1c1c1e",
+  "primaryText": "#ffffff",
+  "chatBackground": "#f7f7f8",
+  "agentBubble": "#ffffff",
+  "agentText": "#1c1c1e",
+  "agentIcon": "headset",
+  "userIcon": "user",
+  "position": "right"
+}

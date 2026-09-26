@@ -316,7 +316,7 @@ Open in a browser:
 | `https://$DOMAIN/test` | chat widget page |
 | `https://$DOMAIN/docs` | Node API docs |
 | `https://$DOMAIN/brain` | question editor (writes files) |
-| `https://$DOMAIN/theme` | widget theme (writes files) |
+| `https://$DOMAIN/theme` | public widget theme builder |
 | `https://$DOMAIN/widget.js` | embed script |
 
 Embed on another site:
@@ -329,16 +329,16 @@ Node already allows any origin for the widget.
 
 ---
 
-## 12. Lock down /brain and /theme — Optional (recommended)
+## 12. Lock down /brain — Optional (recommended)
 
-Those pages write `python/questions/` and `node/data/widget-theme.json`. On a public VPS, put a password on them.
+The brain editor can change `python/questions/`. On a public VPS, put a password on the editor and its write requests. The theme builder stays public and saves each theme separately.
 
 ```bash
 sudo apt install -y apache2-utils
 sudo htpasswd -c /etc/nginx/.htpasswd-relay admin
 ```
 
-Then replace the `location /` block in `/etc/nginx/sites-available/relay` with:
+Then use these locations in `/etc/nginx/sites-available/relay`. Remove any older `location /theme` password block so `/theme` uses the public `location /` route:
 
 ```nginx
     location / {
@@ -360,7 +360,7 @@ Then replace the `location /` block in `/etc/nginx/sites-available/relay` with:
         proxy_set_header X-Forwarded-Proto $scheme;
     }
 
-    location /theme {
+    location /questions/ {
         auth_basic "Relay admin";
         auth_basic_user_file /etc/nginx/.htpasswd-relay;
         proxy_pass http://127.0.0.1:3000;
@@ -375,7 +375,7 @@ Then replace the `location /` block in `/etc/nginx/sites-available/relay` with:
 sudo nginx -t && sudo systemctl reload nginx
 ```
 
-`/agent`, `/test`, and `/widget.js` stay public.
+`/theme`, `/widget/themes`, `/agent`, `/test`, and `/widget.js` stay public. Saving or deleting a brain requires the `/brain` credentials.
 
 ---
 

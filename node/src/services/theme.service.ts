@@ -1,4 +1,4 @@
-import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { randomUUID } from "node:crypto";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -31,14 +31,6 @@ export async function readTheme(): Promise<Theme> {
   }
   const parsed = themeSchema.safeParse({ ...DEFAULT_THEME, ...(saved as object) });
   return parsed.success ? parsed.data : DEFAULT_THEME;
-}
-
-export async function saveTheme(theme: Theme): Promise<Theme> {
-  await mkdir(path.dirname(THEME_FILE), { recursive: true });
-  const temporary = `${THEME_FILE}.tmp`;
-  await writeFile(temporary, JSON.stringify(theme, null, 2) + "\n", "utf8");
-  await rename(temporary, THEME_FILE);
-  return theme;
 }
 
 export async function publishTheme(theme: Theme): Promise<string> {

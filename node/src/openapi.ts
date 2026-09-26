@@ -64,11 +64,13 @@ export const openapi = {
     },
     "/widget/theme": {
       get: {
-        summary: "Read the widget theme",
-        responses: { "200": { description: "Saved theme and the defaults" } },
+        summary: "Read the shared widget theme used by the test page",
+        responses: { "200": { description: "Shared theme and the defaults" } },
       },
-      put: {
-        summary: "Replace the widget theme",
+    },
+    "/widget/themes": {
+      post: {
+        summary: "Create a separate public widget theme",
         requestBody: {
           required: true,
           content: {
@@ -89,7 +91,14 @@ export const openapi = {
             },
           },
         },
-        responses: { "200": { description: "Saved theme" }, "400": { description: "Invalid theme" } },
+        responses: { "201": { description: "Saved theme and its unique URL" }, "400": { description: "Invalid theme" } },
+      },
+    },
+    "/widget/themes/{id}": {
+      get: {
+        summary: "Read a saved public widget theme",
+        parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }],
+        responses: { "200": { description: "Saved theme" }, "404": { description: "Theme not found" } },
       },
     },
     "/agent": {
