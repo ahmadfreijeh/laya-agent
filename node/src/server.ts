@@ -31,6 +31,9 @@ app.use((_req, res, next) => {
   next();
 });
 app.use(express.json({ limit: "1mb" }));
+app.get("/", (_req, res) => {
+  res.render("home");
+});
 app.use(express.static(publicDir));
 app.use("/docs", swaggerUi.serve, swaggerUi.setup(openapi, { customSiteTitle: `${platform.name} API` }));
 app.get("/health", (_req, res) => {

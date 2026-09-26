@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title><%= platform %></title>
+    <link rel="stylesheet" href="/base.css" />
+    <style>
+      html, body { height: 100%; overflow: hidden; }
+      body { display: flex; flex-direction: column; }
+      .home {
+        flex: 1;
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        max-width: 1080px;
+        width: 100%;
+        margin: 0 auto;
+        padding: 24px;
+      }
+      .home h1 { font-size: 28px; letter-spacing: -0.03em; }
+      .home > p { margin: 8px 0 28px; color: var(--text-2); max-width: 420px; }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+        max-width: 640px;
+      }
+      .card {
+        display: block;
+        padding: 18px 16px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        text-decoration: none;
+        background: var(--paper);
+      }
+      .card:hover { border-color: var(--ink); }
+      .card strong { display: block; font-size: 14px; }
+      .card span { display: block; margin-top: 4px; color: var(--text-2); font-size: 13px; }
+      @media (max-width: 560px) {
+        .home h1 { font-size: 22px; }
+        .grid { grid-template-columns: 1fr; }
+      }
+    </style>
+  </head>
+  <body>
+    <%- include("partials/nav", { active: "" }) %>
+    <main class="home">
+      <h1><%= platform %></h1>
+      <p>Customer chat on one box. Pick a page.</p>
+      <div class="grid">
+        <a class="card" href="/test">
+          <strong>Widget test</strong>
+          <span>Try the chat on a sample page</span>
+        </a>
+        <a class="card" href="/brain">
+          <strong>Brains</strong>
+          <span>Edit and try question files</span>
+        </a>
+        <a class="card" href="/theme">
+          <strong>Widget theme</strong>
+          <span>Title, colors, logo, corner</span>
+        </a>
+        <a class="card" href="/docs">
+          <strong>API docs</strong>
+          <span>Node routes and /agent</span>
+        </a>
+      </div>
+    </main>
+  </body>
+</html>
