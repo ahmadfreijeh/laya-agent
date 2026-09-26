@@ -80,47 +80,47 @@ git clone https://github.com/ahmadfreijeh/laya-agent.git $APP
 
 Use your real repo URL. If the code is already on the box, skip `git clone`.
 
+**Env (repo root — this is what Ploi’s site `.env` is)**
+
+```bash
+cp $APP/.env.example $APP/.env
+```
+
+```
+PORT=3000
+LAYA_URL=http://127.0.0.1:8000
+HF_MODEL_ID=convaiinnovations/laya
+```
+
+On this VPS, set `PORT=3002` if that is the Ploi NodeJS port. `HF_TOKEN` is optional.
+
 **Python**
 
 ```bash
 cd $APP/python
-cp .env.example .env
 python3 -m venv .venv
 source .venv/bin/activate
 pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-`HF_TOKEN` in `python/.env` is **optional**. The public `convaiinnovations/laya` checkpoint does not need it.
-
 **Optional:** keep the Hugging Face cache off the home disk:
 
 ```bash
 sudo mkdir -p /var/cache/laya-hf
 sudo chown "$USER:$USER" /var/cache/laya-hf
-echo 'HF_HOME=/var/cache/laya-hf' >> $APP/python/.env
+echo 'HF_HOME=/var/cache/laya-hf' >> $APP/.env
 ```
 
 **Node**
 
 ```bash
 cd $APP/node
-cp .env.example .env
-```
-
-`node/.env` must stay:
-
-```
-PORT=3000
-LAYA_URL=http://127.0.0.1:8000
-```
-
-```bash
 npm install
 npm run build
 ```
 
-Ploi NodeJS (PM2): port `3000`, start command `npm start` (runs `node dist/server.js`). Deploy script should `npm install` and `npm run build` in `node/` before Ploi reloads PM2. Do not start a second PM2 app by hand.
+Ploi NodeJS (PM2): same `PORT` as `.env` (e.g. `3002`), start command `npm start` (runs `node dist/server.js`). Deploy script should `npm install` and `npm run build` in `node/` before Ploi reloads PM2. Do not start a second PM2 app by hand.
 
 ---
 
@@ -131,7 +131,7 @@ First load pulls ~800 MB. Do it before systemd so boot does not wait on Hugging 
 ```bash
 cd $APP/python
 source .venv/bin/activate
-set -a && source .env && set +a
+set -a && source $APP/.env && set +a
 python -c "import laya; laya.load('convaiinnovations/laya')"
 ```
 
@@ -181,7 +181,7 @@ Type=simple
 User=$USER
 WorkingDirectory=$APP/python
 Environment=PATH=$APP/python/.venv/bin:/usr/bin
-EnvironmentFile=-$APP/python/.env
+EnvironmentFile=-$APP/.env
 ExecStart=$APP/python/.venv/bin/uvicorn src.server:app --host 127.0.0.1 --port 8000
 Restart=on-failure
 RestartSec=5
@@ -202,7 +202,7 @@ Type=simple
 User=$USER
 WorkingDirectory=$APP/node
 Environment=PATH=/usr/bin
-EnvironmentFile=-$APP/node/.env
+EnvironmentFile=-$APP/.env
 ExecStart=/usr/bin/npm start
 Restart=on-failure
 RestartSec=5

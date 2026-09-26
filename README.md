@@ -66,8 +66,8 @@ The shipped brain is `python/questions/default.json`. Shared questions there are
 ### Python
 
 ```bash
-cd python
 cp .env.example .env
+cd python
 python3 -m venv .venv
 source .venv/bin/activate
 pip install --upgrade pip
@@ -76,13 +76,12 @@ pip install -r requirements.txt
 
 That installs `laya`, `transformers`, `torch`, `accelerate`, `huggingface_hub`, `python-dotenv`, `fastapi`, and `uvicorn`.
 
-`HF_TOKEN` in `python/.env` is optional. The public checkpoint does not need it.
+`HF_TOKEN` in the root `.env` is optional. The public checkpoint does not need it.
 
 ### Node
 
 ```bash
 cd node
-cp .env.example .env
 npm install
 cd ..
 ```
@@ -242,8 +241,7 @@ Errors from `POST /agent`: `400` when `state.message` is missing (`{ "error", "d
 | `python/questions/*.json` | Brains (questions, shortlist, follow-up bars) |
 | `node/src/replies.json` | Customer reply templates and social thresholds |
 | `node/data/widget-theme.json` | Widget look |
-| `python/.env` | `HF_MODEL_ID`, optional `HF_TOKEN` |
-| `node/.env` | `PORT`, `LAYA_URL` |
+| `.env` | `PORT`, `LAYA_URL`, `HF_MODEL_ID`, optional `HF_TOKEN` |
 
 ---
 
