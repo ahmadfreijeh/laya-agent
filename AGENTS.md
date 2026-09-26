@@ -8,6 +8,10 @@ POST /agent → validate → Laya /predict → policy → stub tool → replies.
 
 Read this file instead of walking the tree. Open only the files named for the task. Prefer grep over reading whole files. Do not spawn explore agents for this repo. Do not rewrite README or add comments unless asked.
 
+After a change that alters architecture, file ownership, routes, commands, policy thresholds, or a durable project invariant, use `.agents/skills/maintain-agents-md/SKILL.md` before the final response. Skip it for isolated copy, styling, tests, and local bug fixes that do not change how future work should be approached.
+
+Use `$api-maintainer` for API endpoint, contract, OpenAPI, and cross-server integration changes. Its project skill is `.agents/skills/api-maintainer/SKILL.md`.
+
 ## Layout
 
 | Path | Role |
@@ -26,7 +30,7 @@ Read this file instead of walking the tree. Open only the files named for the ta
 | `node/src/controllers/theme.controller.ts` | Theme API |
 | `node/src/services/theme.service.ts` | `node/data/widget-theme.json` |
 | `node/public/widget.js` | Embeddable chat |
-| `node/views/*.ejs` | `/test`, `/brain`, `/theme` |
+| `node/views/*.ejs` | `/`, `/test`, `/brain`, `/theme` pages |
 | `node/src/simulate.ts` | Scripted threads through `handle()` |
 | `HOSTING.md` | nginx / HTTPS |
 
@@ -40,6 +44,7 @@ Node never loads the model. Python never writes customer replies.
 | Customer copy | `node/src/replies.json` |
 | New action the user sees | brain `need` label + `replies.json` + optional stub in `TOOLS` |
 | Widget look | `node/data/widget-theme.json` or theme page |
+| Landing page / navigation | `node/views/home.ejs`, `node/views/partials/nav.ejs` |
 | Predict / shortlist / scenarios | `python/src/server.py` |
 | Action / reply choice | `agent.policy.ts`, `agent.service.ts` |
 
@@ -77,3 +82,10 @@ UI: `http://127.0.0.1:3000/test` `/brain` `/theme` `/docs` — Laya docs: `:8000
 - Node: TypeScript ESM, Express 5, Zod at the edge, EJS views.
 - Python: FastAPI, brains in `python/questions/`. `billing` and `billing.json` are the same file.
 - Do not invent a second action per message, real tools, or fine-tunes (`python/train/` is empty).
+
+## Keep this file useful
+
+- Record only facts that save future agents from broad discovery or prevent likely mistakes.
+- Update an existing row or rule before adding a new section. Keep this a project map, not a changelog.
+- Remove or replace stale facts in the same change that makes them stale.
+- Do not add implementation details that are obvious from one named file or relevant to only one completed task.
