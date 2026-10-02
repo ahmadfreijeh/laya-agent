@@ -1,6 +1,6 @@
 import { predict } from "../api/laya.api.js";
 import { chooseAction } from "../policies/agent.policy.js";
-import replies from "../replies.json" with { type: "json" };
+import replies from "../../data/replies.json" with { type: "json" };
 import type { AgentResult, Answers, State } from "../types/agent.js";
 
 type ReplyKind = { name: string; probability: number };

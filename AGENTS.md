@@ -3,7 +3,7 @@
 Two local servers. **Laya** (Python) answers a question file. **Relay** (Node) picks one action from `need` and returns a template. No LLM. No real order/billing/account backend.
 
 ```
-POST /agent → validate → Laya /predict → policy → stub tool → replies.json
+POST /agent → validate → Laya /predict → policy → stub tool → data/replies.json
 ```
 
 Read this file instead of walking the tree. Open only the files named for the task. Prefer grep over reading whole files. Do not spawn explore agents for this repo. Do not rewrite README or add comments unless asked.
@@ -30,7 +30,7 @@ Use `$api-maintainer` for API endpoint, contract, OpenAPI, and cross-server inte
 | `node/src/controllers/agent.controller.ts` | `POST /agent` |
 | `node/src/services/agent.service.ts` | Policy + `TOOLS` stubs |
 | `node/src/policies/agent.policy.ts` | Action bars (0.7 conf, 0.8 prob) |
-| `node/src/replies.json` | Reply templates |
+| `node/data/replies.json` | Reply templates |
 | `node/src/api/laya.api.ts` | Adapts Node brains to Python questions (`LAYA_URL`) |
 | `node/src/controllers/brain.controller.ts` | Brain HTTP forwarder |
 | `node/src/services/brain.service.ts` | Brain validation and Laya execution |
@@ -51,8 +51,8 @@ Node never loads the model. Python never writes customer replies.
 | Change | Files |
 |---|---|
 | Questions / follow-ups | `python/questions/*.json` |
-| Customer copy | `node/src/replies.json` |
-| New action the user sees | brain `need` label + `replies.json` + optional stub in `TOOLS` |
+| Customer copy | `node/data/replies.json` |
+| New action the user sees | brain `need` label + `data/replies.json` + optional stub in `TOOLS` |
 | Widget look | `node/data/widget-theme.json` or theme page |
 | Landing page / navigation | `node/views/home.ejs`, `node/views/partials/nav.ejs` |
 | Predict / shortlist / scenarios | `python/src/server.py` |
