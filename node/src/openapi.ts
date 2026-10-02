@@ -26,38 +26,38 @@ export const openapi = {
         },
       },
     },
-    "/questions": {
+    "/brains": {
       get: {
-        summary: "List question files saved for Laya",
+        summary: "List brain files saved for Laya",
         responses: { "200": { description: "File names in python/questions" } },
       },
     },
-    "/questions/try": {
+    "/brains/try": {
       post: {
-        summary: "Run an unsaved question set against one message",
+        summary: "Run an unsaved brain against one message",
         requestBody: {
           required: true,
           content: {
             "application/json": {
-              example: { message: "I was charged twice", questions: { shared: {}, scenarios: {} } },
+              example: { message: "I was charged twice", brain: { shared: {}, scenarios: {} } },
             },
           },
         },
         responses: {
           "200": { description: "Answers, whether need cleared the bars, and which follow-ups ran" },
-          "400": { description: "Invalid question set" },
+          "400": { description: "Invalid brain" },
         },
       },
     },
-    "/questions/{key}": {
-      get: { summary: "Read one question file", responses: { "200": { description: "Question set" } } },
+    "/brains/{key}": {
+      get: { summary: "Read one brain file", responses: { "200": { description: "Brain" } } },
       put: {
-        summary: "Save a question file through Laya",
+        summary: "Save a brain through Laya",
         parameters: [{ name: "key", in: "path", required: true, schema: { type: "string" } }],
-        responses: { "200": { description: "Saved file" }, "400": { description: "Invalid question set" } },
+        responses: { "200": { description: "Saved brain" }, "400": { description: "Invalid brain" } },
       },
       delete: {
-        summary: "Delete a question file",
+        summary: "Delete a brain file",
         parameters: [{ name: "key", in: "path", required: true, schema: { type: "string" } }],
         responses: { "200": { description: "Deleted file" }, "404": { description: "Missing file" } },
       },
@@ -149,7 +149,7 @@ export const openapi = {
           },
           key: {
             type: "string",
-            description: "Question file in python/questions. `support` and `support.json` both load support.json. Defaults to default.",
+            description: "Brain key maps to a question file in python/questions. `support` and `support.json` both load support.json. Defaults to default.",
           },
         },
       },

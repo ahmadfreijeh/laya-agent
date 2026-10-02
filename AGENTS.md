@@ -16,17 +16,27 @@ Use `$api-maintainer` for API endpoint, contract, OpenAPI, and cross-server inte
 
 | Path | Role |
 |---|---|
-| `python/src/server.py` | FastAPI: `/predict`, `/questions`, `/questions/try` |
-| `python/src/model.py` | Loads `convaiinnovations/laya` once |
-| `python/src/questions.py` | Load/save brains from `python/questions/` |
-| `python/questions/default.json` | Shipped brain |
+| `python/src/server.py` | FastAPI app and model lifespan |
+| `python/src/routes.py` | FastAPI route registration |
+| `python/src/controllers/general.py` | Python health handler |
+| `python/src/controllers/model.py` | Python model handlers: `/predict`, `/questions/try` |
+| `python/src/controllers/questions.py` | Python question-file CRUD handlers |
+| `python/src/validators/model.py` | Python request validation for model endpoints |
+| `python/src/utils.py` | Python HTTP error utility |
+| `python/src/services/model.py` | Load and run `convaiinnovations/laya` |
+| `python/src/services/questions.py` | Load/save and validate questions from `python/questions/` |
+| `python/questions/default.json` | Shipped question file |
 | `node/src/server.ts` | Express: pages, static, routes |
 | `node/src/controllers/agent.controller.ts` | `POST /agent` |
 | `node/src/services/agent.service.ts` | Policy + `TOOLS` stubs |
 | `node/src/policies/agent.policy.ts` | Action bars (0.7 conf, 0.8 prob) |
 | `node/src/replies.json` | Reply templates |
-| `node/src/api/laya.api.ts` | HTTP to Python (`LAYA_URL`) |
-| `node/src/controllers/questions.controller.ts` | Brain CRUD proxy |
+| `node/src/api/laya.api.ts` | Adapts Node brains to Python questions (`LAYA_URL`) |
+| `node/src/controllers/brain.controller.ts` | Brain HTTP forwarder |
+| `node/src/services/brain.service.ts` | Brain validation and Laya execution |
+| `node/src/validators/*.validator.ts` | Endpoint Zod schemas |
+| `node/src/validators/request.validator.ts` | Shared Zod request middleware |
+| `node/src/utils/response.util.ts` | Shared Node JSON response helpers |
 | `node/src/controllers/theme.controller.ts` | Theme API |
 | `node/src/services/theme.service.ts` | `node/data/widget-theme.json` |
 | `node/public/widget.js` | Embeddable chat |
@@ -64,6 +74,9 @@ Node never loads the model. Python never writes customer replies.
 # Python (load model first)
 cd python && source .venv/bin/activate && uvicorn src.server:app --host 127.0.0.1 --port 8000
 
+# Python development reload
+cd python && source .venv/bin/activate && fastapi dev src/server.py
+
 # Node
 cd node && npm start
 
@@ -80,7 +93,7 @@ UI: `http://127.0.0.1:3000/test` `/brain` `/theme` `/docs` — Laya docs: `:8000
 
 - Small diffs. Match the file you are in. No new deps, folders, or abstractions unless asked.
 - Node: TypeScript ESM, Express 5, Zod at the edge, EJS views.
-- Python: FastAPI, brains in `python/questions/`. `billing` and `billing.json` are the same file.
+- Python: FastAPI, questions in `python/questions/`. `billing` and `billing.json` are the same file.
 - Do not invent a second action per message, real tools, or fine-tunes (`python/train/` is empty).
 
 ## Keep this file useful

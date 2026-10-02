@@ -4,7 +4,7 @@ import figlet from "figlet";
 import ora from "ora";
 
 import { handle } from "./services/agent.service.js";
-import type { Answer, Answers } from "./types/laya.js";
+import type { Answer, Answers } from "./types/agent.js";
 
 const customer = "maya@acme.com";
 

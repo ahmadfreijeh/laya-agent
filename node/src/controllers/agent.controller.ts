@@ -1,15 +1,12 @@
 import type { Request, Response } from "express";
 
-import { handle } from "../services/agent.service.js";
-import type { AgentBody } from "../validators/agent.validator.js";
+import { handleRequest } from "../services/agent.service.js";
+import { sendError, sendSuccess } from "../utils/response.util.js";
 
 export async function postAgent(req: Request, res: Response): Promise<void> {
   try {
-    const { state, key } = req.body as AgentBody;
-    const result = await handle(state, key);
-    res.json(result);
+    sendSuccess(res, await handleRequest(req.body));
   } catch (err) {
-    const message = err instanceof Error ? err.message : "agent failed";
-    res.status(502).json({ error: message });
+    sendError(res, err, 502);
   }
 }

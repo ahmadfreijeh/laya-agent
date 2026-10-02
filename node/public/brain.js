@@ -117,7 +117,7 @@ function blankDraft() {
 }
 
 async function loadFiles(selectKey) {
-  const res = await fetch("/questions");
+  const res = await fetch("/brains");
   const body = await res.json();
   if (!res.ok) {
     files = [];
@@ -134,14 +134,14 @@ async function loadFiles(selectKey) {
 }
 
 async function openFile(key) {
-  const res = await fetch("/questions/" + encodeURIComponent(key));
+  const res = await fetch("/brains/" + encodeURIComponent(key));
   const body = await res.json();
   if (!res.ok) {
     setStatus(body.error || "Could not open that brain", true);
     return;
   }
   if (key !== loadedKey) tryResultEl.replaceChildren();
-  draft = fromFile(body.key, body.questions);
+  draft = fromFile(body.key, body.brain);
   loadedKey = body.key;
   baseline = fingerprint();
   openKeys = defaultOpen();
@@ -518,7 +518,7 @@ async function saveCopy() {
 }
 
 async function put(built, done) {
-  const res = await fetch("/questions/" + encodeURIComponent(built.key), {
+  const res = await fetch("/brains/" + encodeURIComponent(built.key), {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(built.questions),
@@ -535,7 +535,7 @@ async function put(built, done) {
 async function removeFile() {
   if (!loadedKey || files.length <= 1) return;
   if (!(await askConfirm(`Delete ${loadedKey}? This removes the file.`, "Delete", true))) return;
-  const res = await fetch("/questions/" + encodeURIComponent(loadedKey), { method: "DELETE" });
+  const res = await fetch("/brains/" + encodeURIComponent(loadedKey), { method: "DELETE" });
   const body = await res.json();
   if (!res.ok) {
     setStatus(body.error || "Delete failed", true);
@@ -566,10 +566,10 @@ async function runTry() {
   button.disabled = true;
   tryResultEl.innerHTML = `<p class="hint">Reading…</p>`;
   try {
-    const res = await fetch("/questions/try", {
+    const res = await fetch("/brains/try", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message, questions }),
+      body: JSON.stringify({ message, brain: questions }),
     });
     const body = await res.json();
     tryResultEl.innerHTML = res.ok ? tryHtml(body, questions) : `<p class="warn">${esc(body.error || "Could not run")}</p>`;

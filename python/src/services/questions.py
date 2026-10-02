@@ -6,7 +6,7 @@ from typing import Any
 # Question sets are JSON files in python/questions. Predict loads the file
 # named by `key` (the file name, with or without .json).
 
-QUESTIONS_DIR = Path(__file__).resolve().parents[1] / "questions"
+QUESTIONS_DIR = Path(__file__).resolve().parents[2] / "questions"
 KEY_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$")
 ID_RE = re.compile(r"^[A-Za-z][A-Za-z0-9_]{0,63}$")
 QUESTION_TYPES = {"choice", "score", "noul"}

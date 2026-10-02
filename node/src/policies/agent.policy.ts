@@ -1,5 +1,4 @@
-import type { Action } from "../types/agent.js";
-import type { Answers } from "../types/laya.js";
+import type { Action, Answers } from "../types/agent.js";
 
 // Both must clear. `confidence` is how peaked the distribution is.
 // `probability` is the chosen label's own share. Missing probabilities

@@ -8,7 +8,7 @@
   var greeting = script.dataset.greeting || "Hi. How can we help?";
   var themeUrl = script.dataset.theme || new URL("/widget/theme", script.src).href;
   var previewing = false;
-  var brainsUrl = script.dataset.brains || new URL("/questions", script.src).href;
+  var brainsUrl = script.dataset.brains || new URL("/brains", script.src).href;
   var pickedName = "relay-chat-brain:" + endpoint;
   var brains = [];
   var picked = loadPicked();

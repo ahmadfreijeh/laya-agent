@@ -1,8 +1,7 @@
 import { predict } from "../api/laya.api.js";
 import { chooseAction } from "../policies/agent.policy.js";
 import replies from "../replies.json" with { type: "json" };
-import type { AgentResult } from "../types/agent.js";
-import type { Answers, State } from "../types/laya.js";
+import type { AgentResult, Answers, State } from "../types/agent.js";
 
 type ReplyKind = { name: string; probability: number };
 type SocialLine = { min: number; reply: string };
@@ -56,17 +55,9 @@ export async function handle(state: State, key?: string): Promise<AgentResult> {
   const action = socialText ? "reply" : chosen;
   const replyText = replies.actions[action as keyof typeof replies.actions];
   const reply = socialText ?? replyText ?? draftReply(state);
-
-  console.log("Full", {
-    chosen,
-    toolRequest,
-    ran,
-    tool,
-    kind,
-    socialText,
-    action,
-  });
-  console.log("--------------------------------");
-
   return { action, used_llm: replyText == null, tool, reply, answers };
+}
+
+export function handleRequest(body: { state: State; key?: string }): Promise<AgentResult> {
+  return handle(body.state, body.key);
 }

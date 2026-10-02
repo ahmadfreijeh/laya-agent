@@ -3,7 +3,8 @@ import { randomUUID } from "node:crypto";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { type Theme, themeSchema } from "../validators/theme.validator.js";
+import { themeSchema } from "../validators/theme.validator.js";
+import type { Theme } from "../types/theme.js";
 
 const THEME_FILE = path.join(path.dirname(fileURLToPath(import.meta.url)), "..", "..", "data", "widget-theme.json");
 const PUBLISHED_DIR = path.join(path.dirname(THEME_FILE), "widget-themes");
@@ -21,6 +22,10 @@ export const DEFAULT_THEME: Theme = {
   userIcon: "user",
   position: "right",
 };
+
+export class ThemeNotFoundError extends Error {
+  status = 404;
+}
 
 export async function readTheme(): Promise<Theme> {
   let saved: unknown;
@@ -40,14 +45,14 @@ export async function publishTheme(theme: Theme): Promise<string> {
   return id;
 }
 
-export async function readPublishedTheme(id: string): Promise<Theme | null> {
-  if (!/^[0-9a-f-]{36}$/i.test(id)) return null;
+export async function readPublishedTheme(id: string): Promise<Theme> {
   let saved: unknown;
   try {
     saved = JSON.parse(await readFile(path.join(PUBLISHED_DIR, `${id}.json`), "utf8"));
   } catch {
-    return null;
+    throw new ThemeNotFoundError("theme not found");
   }
   const parsed = themeSchema.safeParse(saved);
-  return parsed.success ? parsed.data : null;
+  if (!parsed.success) throw new ThemeNotFoundError("theme not found");
+  return parsed.data;
 }

@@ -8,7 +8,7 @@ import swaggerUi from "swagger-ui-express";
 import { openapi } from "./openapi.js";
 import { platform } from "./platform.js";
 import { agentRoute } from "./routes/agent.route.js";
-import { questionsRoute } from "./routes/questions.route.js";
+import { brainsRoute } from "./routes/brain.route.js";
 import { themeRoute } from "./routes/theme.route.js";
 
 const PORT = Number(process.env.PORT) || 3000;
@@ -48,14 +48,11 @@ app.get("/test", (_req, res) => {
 app.get("/theme", (_req, res) => {
   res.render("theme");
 });
-app.get("/questions.html", (_req, res) => {
-  res.redirect(301, "/brain");
-});
 app.get(["/demo", "/demo.html"], (_req, res) => {
   res.redirect(301, "/test");
 });
 app.use(agentRoute);
-app.use(questionsRoute);
+app.use(brainsRoute);
 app.use(themeRoute);
 
 app.listen(PORT, () => {
