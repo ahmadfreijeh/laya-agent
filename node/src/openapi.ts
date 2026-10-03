@@ -87,11 +87,12 @@ export const openapi = {
                 agentIcon: "headset",
                 userIcon: "user",
                 position: "right",
+                webhookUrl: "https://example.com/webhooks/relay",
               },
             },
           },
         },
-        responses: { "201": { description: "Saved theme and its unique URL" }, "400": { description: "Invalid theme" } },
+        responses: { "201": { description: "Saved widget theme and optional webhook credentials" }, "400": { description: "Invalid theme or webhook URL" } },
       },
     },
     "/widget/themes/{id}": {
@@ -99,6 +100,12 @@ export const openapi = {
         summary: "Read a saved public widget theme",
         parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }],
         responses: { "200": { description: "Saved theme" }, "404": { description: "Theme not found" } },
+      },
+    },
+    "/webhooks/test": {
+      post: {
+        summary: "Development-only webhook receiver; logs the payload when ENABLE_TEST_WEBHOOK=true",
+        responses: { "204": { description: "Payload logged" }, "404": { description: "Test receiver disabled" } },
       },
     },
     "/agent": {
@@ -110,6 +117,7 @@ export const openapi = {
             "application/json": {
               schema: { $ref: "#/components/schemas/AgentRequest" },
               example: {
+                widgetId: "a4ea1736-8bdd-45a5-9bee-38c3645e5e86",
                 state: {
                   customer: "user@acme.com",
                   message: "Where is my order? It was supposed to arrive yesterday.",
@@ -150,6 +158,11 @@ export const openapi = {
           key: {
             type: "string",
             description: "Brain key maps to a question file in python/questions. `support` and `support.json` both load support.json. Defaults to default.",
+          },
+          widgetId: {
+            type: "string",
+            format: "uuid",
+            description: "Public widget ID from the embed script. When configured, Relay delivers the signed webhook after responding to the visitor.",
           },
         },
       },

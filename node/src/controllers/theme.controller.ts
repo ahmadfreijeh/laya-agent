@@ -15,8 +15,9 @@ export async function getTheme(_req: Request, res: Response): Promise<void> {
 
 export async function postPublishedTheme(req: Request, res: Response): Promise<void> {
   try {
-    const id = await publishTheme(req.body as Theme);
-    sendSuccess(res, { id, theme: req.body, themePath: `/widget/themes/${id}` }, 201);
+    const { webhookUrl, ...theme } = req.body as Theme & { webhookUrl?: string };
+    const widget = await publishTheme(theme, webhookUrl || undefined);
+    sendSuccess(res, { id: widget.id, theme, themePath: `/widget/themes/${widget.id}`, webhook: widget.webhook }, 201);
   } catch (err) {
     sendError(res, err);
   }

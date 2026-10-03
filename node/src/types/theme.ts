@@ -13,3 +13,14 @@ export type Theme = {
   userIcon: (typeof BUBBLE_ICONS)[number];
   position: "right" | "left";
 };
+
+export type WebhookCredentials = {
+  url: string;
+  secret: string;
+  managementToken: string;
+};
+
+export type PublishedWidget = {
+  id: string;
+  webhook: WebhookCredentials | null;
+};

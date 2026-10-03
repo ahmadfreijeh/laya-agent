@@ -6,6 +6,7 @@
   var endpoint = script.dataset.endpoint || new URL("/agent", script.src).href;
   var title = script.dataset.title || "Support";
   var greeting = script.dataset.greeting || "Hi. How can we help?";
+  var widgetId = (script.dataset.widgetId || "").trim();
   var themeUrl = script.dataset.theme || new URL("/widget/theme", script.src).href;
   var previewing = false;
   var brainsUrl = script.dataset.brains || new URL("/brains", script.src).href;
@@ -310,6 +311,7 @@
     var payload = { state: { customer: convo.email, message: text } };
     var key = brainName();
     if (key) payload.key = key;
+    if (widgetId) payload.widgetId = widgetId;
     return payload;
   }
 

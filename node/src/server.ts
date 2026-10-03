@@ -36,6 +36,12 @@ app.get("/", (_req, res) => {
 });
 app.use(express.static(publicDir));
 app.use("/docs", swaggerUi.serve, swaggerUi.setup(openapi, { customSiteTitle: `${platform.name} API` }));
+if (process.env.ENABLE_TEST_WEBHOOK === "true") {
+  app.post("/webhooks/test", (req, res) => {
+    console.log("Test webhook received", JSON.stringify({ headers: req.headers, body: req.body }, null, 2));
+    res.sendStatus(204);
+  });
+}
 app.get("/health", (_req, res) => {
   res.json({ ok: true, name: platform.name });
 });

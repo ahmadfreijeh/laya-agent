@@ -112,7 +112,7 @@ async function load() {
 function fill() {
   for (const el of formEl.querySelectorAll("[data-field]")) {
     const field = el.dataset.field;
-    el.value = field === "logoUrl" ? (draft.logo.startsWith("data:") ? "" : draft.logo) : draft[field];
+    el.value = field === "logoUrl" ? (draft.logo.startsWith("data:") ? "" : draft.logo) : (draft[field] || "");
   }
   for (const color of COLORS) {
     formEl.querySelector(`[data-color="${color.field}"]`).value = draft[color.field];
@@ -130,6 +130,7 @@ function fill() {
 function onInput(event) {
   const el = event.target;
   if (el.dataset.field === "logoUrl") draft.logo = el.value.trim();
+  else if (el.dataset.field === "webhookUrl") draft.webhookUrl = el.value.trim();
   else if (el.dataset.field) draft[el.dataset.field] = el.value;
   else if (el.dataset.color) {
     draft[el.dataset.color] = el.value;
@@ -192,6 +193,11 @@ function problem() {
   if (!draft.title.trim()) return "Add a title.";
   if (!draft.greeting.trim()) return "Add a greeting.";
   if (draft.logo && !/^(https?:\/\/|data:image\/)/i.test(draft.logo)) return "The logo URL must start with http:// or https://.";
+  var localTestWebhook = new URL("/webhooks/test", window.location.origin);
+  localTestWebhook.hostname = "127.0.0.1";
+  if (draft.webhookUrl && !/^https:\/\/\S+$/i.test(draft.webhookUrl) && draft.webhookUrl !== localTestWebhook.href) {
+    return "The webhook URL must use HTTPS, except for the local test receiver.";
+  }
   for (const color of COLORS) if (!HEX.test(draft[color.field])) return `${color.label} must be a hex color like #1c1c1e.`;
   return "";
 }
@@ -220,12 +226,18 @@ async function save() {
     });
     const body = await res.json();
     if (!res.ok) throw new Error(body.error || "Save failed");
-    saved = body.theme;
+    saved = { ...body.theme, webhookUrl: draft.webhookUrl || "" };
     draft = { ...saved };
     fill();
     const widgetUrl = new URL("/widget.js", window.location.origin).href;
     const themeUrl = new URL(body.themePath, window.location.origin).href;
-    embedCode.textContent = `<script src="${widgetUrl}" data-theme="${themeUrl}" defer></script>`;
+    embedCode.textContent = `<script src="${widgetUrl}" data-widget-id="${body.id}" data-theme="${themeUrl}" defer></script>`;
+    const credentials = document.getElementById("webhook-credentials");
+    credentials.hidden = !body.webhook;
+    if (body.webhook) {
+      document.getElementById("webhook-secret").value = body.webhook.secret;
+      document.getElementById("management-token").value = body.webhook.managementToken;
+    }
     document.getElementById("view-embed").hidden = false;
     copyStatus.textContent = "";
     embedResult.showModal();

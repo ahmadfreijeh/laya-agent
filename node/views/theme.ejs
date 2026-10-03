@@ -68,6 +68,11 @@
               <label><input type="radio" name="position" value="left" /> Bottom left</label>
             </div>
           </section>
+          <section>
+            <h2>Webhook</h2>
+            <label>Webhook URL<input data-field="webhookUrl" type="url" placeholder="https://example.com/webhooks/relay" /></label>
+            <p class="hint">Optional. Use HTTPS, or <code>http://127.0.0.1:&lt;port&gt;/webhooks/test</code> while local test webhooks are enabled. Your signing secret and management token are shown once after saving.</p>
+          </section>
           <button class="reset-defaults" type="button" id="defaults">Reset to defaults</button>
         </form>
       </div>
@@ -76,6 +81,14 @@
       <h2 id="embed-title">Your saved widget script</h2>
       <p>Paste this before the closing <code>&lt;/body&gt;</code> tag on your site. This script keeps the theme you just saved.</p>
       <pre><code id="embed-code"></code></pre>
+      <div id="webhook-credentials" hidden>
+        <p>Save these credentials on your server now. They will not be shown again, and must never go in the embed script or browser code.</p>
+        <label>Signing secret<input id="webhook-secret" readonly /></label>
+        <p>The signing secret is used by your server to verify future Relay webhook signatures.</p>
+        <label>Management token<input id="management-token" readonly /></label>
+        <p>Store the management token like a password. Relay stores only its hash.</p>
+        <p>Webhook delivery is not enabled yet; these credentials prepare your widget for that next step.</p>
+      </div>
       <p class="copy-status" id="copy-status" role="status" aria-live="polite"></p>
       <div class="embed-actions">
         <button class="tool" type="button" id="close-embed">Done</button>

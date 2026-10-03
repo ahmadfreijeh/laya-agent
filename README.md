@@ -151,12 +151,34 @@ The visitor enters an email. That address and the thread stay in this browser’
 | `data-endpoint` | Agent URL (default: the host that served the script) |
 | `data-title` / `data-greeting` | Override the saved theme |
 | `data-theme` | Theme JSON URL (default `GET /widget/theme`) |
+| `data-widget-id` | Public widget ID from the generated script; enables this widget's webhook delivery |
 | `data-key` | Lock to that brain; hide the picker |
 | `data-brains` | Brain list URL (default `GET /questions`) |
 
 Without `data-key`, the widget lists brains and shows a menu when there is more than one. The pick is remembered per device; each brain has its own thread.
 
-Theme lives in `node/data/widget-theme.json` (title, greeting, logo up to 300 KB, colors, icons, corner). Edit it at http://127.0.0.1:3000/theme. Save replaces the file. Sites pick up the next load.
+The shared default theme lives in `node/data/widget-theme.json` (title, greeting, logo up to 300 KB, colors, icons, corner). At `/theme`, each save creates an independent published widget in SQLite and gives you its embed script.
+
+### Webhook setup
+
+When saving a new theme at `/theme`, you can optionally set an HTTPS webhook URL. Relay saves the public theme plus the widget's private webhook configuration in SQLite. Configure `WEBHOOK_ENCRYPTION_KEY` before saving a widget with a webhook; locally, leaving `RELAY_DB_PATH` unset uses `node/data/relay.sqlite`.
+
+After saving, Relay shows two one-time credentials:
+
+- **Signing secret:** store this only in the receiving system's server-side configuration. It will be used to verify future Relay webhook signatures.
+- **Management token:** store this like a password. Relay retains only its hash for future widget-management requests.
+
+Never place either value in the embed script, browser code, source control, or a client-side environment variable. Relay encrypts its own saved copy of the signing secret.
+
+When a visitor sends a message, the widget sends its public `data-widget-id` to Relay. Relay responds to the visitor first, then sends a `message.received` webhook without delaying the chat response. The JSON includes the widget ID, customer email, message, selected brain, and Relay agent result. Relay signs the exact raw JSON body with `HMAC-SHA256(secret, timestamp + "." + body)` and supplies these headers: `X-Relay-Delivery`, `X-Relay-Event`, `X-Relay-Timestamp`, and `X-Relay-Signature` (`sha256=<hex>`). Reject signatures that do not match or timestamps older than a few minutes.
+
+For a local payload preview, set `ENABLE_TEST_WEBHOOK=true` in `.env`, restart Relay, and create a widget with this exact webhook URL (replace the port if needed):
+
+```text
+http://127.0.0.1:3000/webhooks/test
+```
+
+When the widget sends a message, Relay prints the headers and JSON payload to the Node terminal. This receiver performs no signature verification and is available only while `ENABLE_TEST_WEBHOOK=true`; never enable it in production.
 
 ---
 

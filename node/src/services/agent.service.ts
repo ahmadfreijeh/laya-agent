@@ -50,11 +50,17 @@ export async function handle(state: State, key?: string): Promise<AgentResult> {
   const toolRequest = run != null;
   const ran = run?.(state);
   const tool = toolRequest ? (typeof ran === "string" ? ran : chosen) : null;
+
+
   const kind = replyKind(answers);
   const socialText = toolRequest || !kind ? null : socialReply(kind);
+
+
   const action = socialText ? "reply" : chosen;
+
   const replyText = replies.actions[action as keyof typeof replies.actions];
   const reply = socialText ?? replyText ?? draftReply(state);
+  
   return { action, used_llm: replyText == null, tool, reply, answers };
 }
 

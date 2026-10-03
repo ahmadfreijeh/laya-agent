@@ -3,7 +3,7 @@
 Two local servers. **Laya** (Python) answers a question file. **Relay** (Node) picks one action from `need` and returns a template. No LLM. No real order/billing/account backend.
 
 ```
-POST /agent → validate → Laya /predict → policy → stub tool → data/replies.json
+POST /agent → validate → Laya /predict → policy → stub tool → data/replies.json → optional widget webhook
 ```
 
 Read this file instead of walking the tree. Open only the files named for the task. Prefer grep over reading whole files. Do not spawn explore agents for this repo. Do not rewrite README or add comments unless asked.
@@ -26,8 +26,8 @@ Use `$api-maintainer` for API endpoint, contract, OpenAPI, and cross-server inte
 | `python/src/services/model.py` | Load and run `convaiinnovations/laya` |
 | `python/src/services/questions.py` | Load/save and validate questions from `python/questions/` |
 | `python/questions/default.json` | Shipped question file |
-| `node/src/server.ts` | Express: pages, static, routes |
-| `node/src/controllers/agent.controller.ts` | `POST /agent` |
+| `node/src/server.ts` | Express: pages, static, routes, optional development test webhook receiver (`ENABLE_TEST_WEBHOOK=true`) |
+| `node/src/controllers/agent.controller.ts` | `POST /agent`; starts optional signed widget webhook delivery after responding |
 | `node/src/services/agent.service.ts` | Policy + `TOOLS` stubs |
 | `node/src/policies/agent.policy.ts` | Action bars (0.7 conf, 0.8 prob) |
 | `node/data/replies.json` | Reply templates |
@@ -38,7 +38,8 @@ Use `$api-maintainer` for API endpoint, contract, OpenAPI, and cross-server inte
 | `node/src/validators/request.validator.ts` | Shared Zod request middleware |
 | `node/src/utils/response.util.ts` | Shared Node JSON response helpers |
 | `node/src/controllers/theme.controller.ts` | Theme API |
-| `node/src/services/theme.service.ts` | `node/data/widget-theme.json` |
+| `node/src/services/database.service.ts` | Shared SQLite connection and async query helpers via `sqlite3` (`RELAY_DB_PATH`) |
+| `node/src/services/theme.service.ts` | Shared `node/data/widget-theme.json`; published widgets and private webhook credentials in SQLite (`RELAY_DB_PATH`, default `node/data/relay.sqlite`) |
 | `node/public/widget.js` | Embeddable chat |
 | `node/views/*.ejs` | `/`, `/test`, `/brain`, `/theme` pages |
 | `node/src/simulate.ts` | Scripted threads through `handle()` |
@@ -53,7 +54,7 @@ Node never loads the model. Python never writes customer replies.
 | Questions / follow-ups | `python/questions/*.json` |
 | Customer copy | `node/data/replies.json` |
 | New action the user sees | brain `need` label + `data/replies.json` + optional stub in `TOOLS` |
-| Widget look | `node/data/widget-theme.json` or theme page |
+| Widget look / webhook setup | `node/data/widget-theme.json` or theme page; published widget records in SQLite |
 | Landing page / navigation | `node/views/home.ejs`, `node/views/partials/nav.ejs` |
 | Predict / shortlist / scenarios | `python/src/server.py` |
 | Action / reply choice | `agent.policy.ts`, `agent.service.ts` |
@@ -93,6 +94,7 @@ UI: `http://127.0.0.1:3000/test` `/brain` `/theme` `/docs` — Laya docs: `:8000
 
 - Small diffs. Match the file you are in. No new deps, folders, or abstractions unless asked.
 - Node: TypeScript ESM, Express 5, Zod at the edge, EJS views.
+- `WEBHOOK_ENCRYPTION_KEY` is required to configure a webhook; signing secrets are encrypted in SQLite and returned only when the widget is created.
 - Python: FastAPI, questions in `python/questions/`. `billing` and `billing.json` are the same file.
 - Do not invent a second action per message, real tools, or fine-tunes (`python/train/` is empty).
 
